@@ -48,7 +48,17 @@ The project follows a phased approach documented in `dev/roadmap/`:
 - Unit test coverage required for all functions
 - Use Obsidian Plugin API patterns and conventions
 
-## Build & Development Commands
+## Development Workflow
+
+### PR-Based Development
+All changes to this repository follow a PR-based workflow:
+- Create feature branches with descriptive names (e.g., `feature/`, `fix/`, `setup/`)
+- Make atomic commits with clear messages
+- Open PRs for review, even for small changes
+- Use GitHub's auto-delete branch feature after merge
+- CI/CD workflows validate all PRs automatically
+
+### Build & Development Commands
 
 *Note: These commands will be established during phase 1 (Hello World Plugin) implementation:*
 - Build process: TBD (TypeScript compilation)
