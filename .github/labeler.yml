@@ -1,0 +1,52 @@
+# Configuration for actions/labeler
+# Automatically adds labels based on file paths changed
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**'
+      - 'dev/**'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
+
+github-actions:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+
+configuration:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.*rc'
+      - '.*rc.js'
+      - '.*rc.json'
+      - '.*rc.yml'
+      - '.*rc.yaml'
+      - '*.config.js'
+      - '*.config.ts'
+      - '.editorconfig'
+      - '.gitignore'
+
+source:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - '**/*.spec.ts'
+      - '**/*.spec.tsx'
+      - 'tests/**'
+      - '__tests__/**'
