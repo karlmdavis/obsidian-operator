@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or Discussion
+    url: https://github.com/karlmdavis/obsidian-operator/discussions
+    about: Ask questions or start discussions about Obsidian Operator
+  - name: Security Vulnerability
+    url: https://github.com/karlmdavis/obsidian-operator/security/advisories/new
+    about: Report security vulnerabilities privately
