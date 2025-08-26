@@ -1,0 +1,26 @@
+# CODEOWNERS file for automatic review assignment
+# Each line is a file pattern followed by one or more owners.
+# Order matters: later rules override earlier ones.
+
+# Default owner for everything in the repo
+* @karlmdavis
+
+# Documentation files
+*.md @karlmdavis
+/dev/ @karlmdavis
+/docs/ @karlmdavis
+
+# Configuration files
+/.github/ @karlmdavis
+*.json @karlmdavis
+*.yml @karlmdavis
+*.yaml @karlmdavis
+
+# Source code (once implemented)
+/src/ @karlmdavis
+*.ts @karlmdavis
+*.tsx @karlmdavis
+
+# Build and CI configuration
+/.github/workflows/ @karlmdavis
+*config.js @karlmdavis
