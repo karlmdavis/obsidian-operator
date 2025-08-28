@@ -1,0 +1,9 @@
+[test]
+preload = ["./tests/setup/happydom.ts"]
+
+[install]
+# Install exact versions to avoid compatibility issues
+exact = true
+
+# Use the most compatible registry
+registry = "https://registry.npmjs.org/"
