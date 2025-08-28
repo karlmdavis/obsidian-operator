@@ -1,0 +1,91 @@
+/* Obsidian Operator Plugin Styles */
+
+.obsidian-operator-modal {
+	width: 60%;
+	min-width: 400px;
+}
+
+.obsidian-operator-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2rem;
+	gap: 1.5rem;
+}
+
+.obsidian-operator-button {
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+	border: 4px solid;
+	font-size: 1.5rem;
+	font-weight: bold;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	background: transparent;
+	color: var(--text-normal);
+}
+
+.obsidian-operator-button:hover {
+	transform: scale(1.05);
+}
+
+.obsidian-operator-button.record {
+	border-color: #e74c3c;
+	color: #e74c3c;
+}
+
+.obsidian-operator-button.record:hover {
+	background-color: rgba(231, 76, 60, 0.1);
+}
+
+.obsidian-operator-button.pause {
+	border-color: #f39c12;
+	color: #f39c12;
+}
+
+.obsidian-operator-button.pause:hover {
+	background-color: rgba(243, 156, 18, 0.1);
+}
+
+.obsidian-operator-count-display {
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 1.2rem;
+	color: var(--text-muted);
+	min-height: 2rem;
+	text-align: center;
+	line-height: 1.4;
+	word-wrap: break-word;
+	max-width: 100%;
+}
+
+.obsidian-operator-view {
+	padding: 2rem;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+	.obsidian-operator-modal {
+		width: 90%;
+		min-width: 300px;
+	}
+	
+	.obsidian-operator-button {
+		width: 150px;
+		height: 150px;
+		font-size: 1.2rem;
+	}
+	
+	.obsidian-operator-container {
+		padding: 1rem;
+		gap: 1rem;
+	}
+}

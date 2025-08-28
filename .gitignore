@@ -42,8 +42,6 @@ test-results/
 
 # Obsidian plugin development
 main.js
-styles.css
-manifest.json
 .hotreload/
 
 # Package manager files
