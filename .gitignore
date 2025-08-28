@@ -14,8 +14,7 @@ out/
 main.js
 *.js.map
 
-# IDE and editor files (only personal preferences)
-.idea/
+# Editor temporary files
 *.swp
 *.swo
 *~
