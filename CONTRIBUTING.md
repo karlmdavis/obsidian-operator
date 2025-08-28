@@ -47,9 +47,16 @@ This project is still experimental, but the intent is to create a plugin that im
 1. **Install the Hot Reload plugin** in Obsidian:
    - Community plugins → Browse → Search for "Hot Reload" → Install
 
-2. **Set your vault path**:
+2. **Set your vault path** (choose one option):
+   
+   Option A - Environment variable:
    ```bash
    export OBSIDIAN_PLUGINS_PATH="/path/to/your/vault/.obsidian/plugins"
+   ```
+   
+   Option B - Create `.env` file in project root:
+   ```bash
+   OBSIDIAN_PLUGINS_PATH=/path/to/your/vault/.obsidian/plugins
    ```
 
 3. **Run development build**:
@@ -57,11 +64,11 @@ This project is still experimental, but the intent is to create a plugin that im
    bun run dev
    ```
    
-   This will:
-   - Watch for changes in `src/`
-   - Rebuild automatically on changes
-   - Copy files to your vault
-   - Create `.hotreload` file to trigger the Hot Reload plugin
+   This single command handles everything:
+   - Watches for changes in `src/`
+   - Rebuilds automatically on changes
+   - Automatically installs to your vault (no manual copying needed)
+   - Creates `.hotreload` file to trigger the Hot Reload plugin
    - Obsidian will automatically reload the plugin when changes are detected
 
 ### Development Commands
