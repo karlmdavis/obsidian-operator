@@ -38,6 +38,8 @@ The project follows a phased approach documented in `dev/roadmap/`:
 
 ## Code Style Guidelines
 
+When reading `CLAUDE.md`, please also be sure to read `CONTRIBUTING.md`.
+
 ### Markdown Formatting
 - **One sentence per line** convention for all Markdown files
 - Lines longer than 110 characters wrapped at logical breaks (comma/clause)
