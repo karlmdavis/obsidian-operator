@@ -19,11 +19,11 @@ export class LocalRecordingState {
 
 	startRecording(): void {
 		if (this.isRecording) return;
-		
+
 		this.isRecording = true;
 		this.elapsedSeconds = 0;
 		this.randomNumbers = [];
-		
+
 		// Start the interval timer
 		this.intervalId = window.setInterval(() => {
 			this.elapsedSeconds++;
@@ -31,7 +31,7 @@ export class LocalRecordingState {
 			this.randomNumbers.push(randomNum);
 			this.notifyListeners();
 		}, 1000);
-		
+
 		this.notifyListeners();
 	}
 
@@ -39,12 +39,12 @@ export class LocalRecordingState {
 		this.isRecording = false;
 		this.elapsedSeconds = 0;
 		this.randomNumbers = [];
-		
+
 		if (this.intervalId !== null) {
 			window.clearInterval(this.intervalId);
 			this.intervalId = null;
 		}
-		
+
 		this.notifyListeners();
 	}
 
@@ -54,7 +54,7 @@ export class LocalRecordingState {
 			elapsedSeconds: this.elapsedSeconds,
 			randomNumbers: [...this.randomNumbers],
 			formattedDuration: this.formatDuration(),
-			formattedRandoms: this.formatRandomNumbers()
+			formattedRandoms: this.formatRandomNumbers(),
 		};
 	}
 
@@ -65,18 +65,20 @@ export class LocalRecordingState {
 
 	private notifyListeners(): void {
 		const state = this.getState();
-		this.listeners.forEach(listener => listener(state));
+		for (const listener of this.listeners) {
+			listener(state);
+		}
 	}
 
 	private formatDuration(): string {
 		const minutes = Math.floor(this.elapsedSeconds / 60);
 		const seconds = this.elapsedSeconds % 60;
-		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+		return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 	}
 
 	private formatRandomNumbers(): string {
-		if (this.randomNumbers.length === 0) return '';
-		return this.randomNumbers.map(n => `${n}...`).join(' ');
+		if (this.randomNumbers.length === 0) return "";
+		return this.randomNumbers.map((n) => `${n}...`).join(" ");
 	}
 
 	destroy(): void {

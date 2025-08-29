@@ -20,25 +20,30 @@ export class MockComponent implements MockEventTarget {
 	}
 
 	trigger(type: string, event: Event): void {
-		this.listeners.get(type)?.forEach(listener => listener(event));
+		const typeListeners = this.listeners.get(type);
+		if (typeListeners) {
+			for (const listener of typeListeners) {
+				listener(event);
+			}
+		}
 	}
 }
 
 export class MockWorkspaceLeaf {
 	view: any = null;
-	
+
 	setViewState(viewState: { type: string }): Promise<void> {
 		return Promise.resolve();
 	}
 
 	getViewState() {
-		return { type: this.view?.getViewType?.() || 'empty' };
+		return { type: this.view?.getViewType?.() || "empty" };
 	}
 }
 
 export class MockWorkspace {
 	private leaves: MockWorkspaceLeaf[] = [];
-	
+
 	getLeaf(newLeaf?: boolean): MockWorkspaceLeaf {
 		if (newLeaf || this.leaves.length === 0) {
 			const leaf = new MockWorkspaceLeaf();
@@ -49,7 +54,7 @@ export class MockWorkspace {
 	}
 
 	getLeavesOfType(type: string): MockWorkspaceLeaf[] {
-		return this.leaves.filter(leaf => leaf.getViewState().type === type);
+		return this.leaves.filter((leaf) => leaf.getViewState().type === type);
 	}
 
 	revealLeaf(leaf: MockWorkspaceLeaf): void {
@@ -66,7 +71,7 @@ export class MockVault {
 	}
 
 	read(path: string): Promise<string> {
-		return Promise.resolve('mock file content');
+		return Promise.resolve("mock file content");
 	}
 
 	exists(path: string): Promise<boolean> {
@@ -77,7 +82,7 @@ export class MockVault {
 export class MockApp {
 	workspace = new MockWorkspace();
 	vault = new MockVault();
-	
+
 	constructor() {
 		// Initialize mock app
 	}
@@ -85,8 +90,8 @@ export class MockApp {
 
 export class MockPlugin extends MockComponent {
 	app: MockApp;
-	manifest = { id: 'test-plugin', name: 'Test Plugin', version: '1.0.0' };
-	
+	manifest = { id: "test-plugin", name: "Test Plugin", version: "1.0.0" };
+
 	private commands = new Map<string, any>();
 	private ribbonIcons = new Map<string, HTMLElement>();
 	private statusBarItems: HTMLElement[] = [];
@@ -96,13 +101,18 @@ export class MockPlugin extends MockComponent {
 		this.app = app;
 	}
 
-	addCommand(command: { id: string; name: string; callback?: () => void; editorCallback?: (editor: any, view: any) => void }): void {
+	addCommand(command: {
+		id: string;
+		name: string;
+		callback?: () => void;
+		editorCallback?: (editor: any, view: any) => void;
+	}): void {
 		this.commands.set(command.id, command);
 	}
 
 	addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => void): HTMLElement {
-		const element = document.createElement('div');
-		element.className = 'ribbon-icon';
+		const element = document.createElement("div");
+		element.className = "ribbon-icon";
 		element.title = title;
 		element.onclick = (evt) => callback(evt as MouseEvent);
 		this.ribbonIcons.set(icon, element);
@@ -110,8 +120,8 @@ export class MockPlugin extends MockComponent {
 	}
 
 	addStatusBarItem(): HTMLElement {
-		const element = document.createElement('div');
-		element.className = 'status-bar-item';
+		const element = document.createElement("div");
+		element.className = "status-bar-item";
 		this.statusBarItems.push(element);
 		return element;
 	}
@@ -145,7 +155,7 @@ export class MockPlugin extends MockComponent {
 	clickRibbonIcon(icon: string): void {
 		const element = this.ribbonIcons.get(icon);
 		if (element?.onclick) {
-			element.onclick(new MouseEvent('click') as any);
+			element.onclick(new MouseEvent("click") as any);
 		}
 	}
 }
@@ -154,16 +164,16 @@ export class MockModal extends MockComponent {
 	app: MockApp;
 	containerEl: HTMLElement;
 	contentEl: HTMLElement;
-	
+
 	private isOpen = false;
 
 	constructor(app: MockApp) {
 		super();
 		this.app = app;
-		this.containerEl = document.createElement('div');
-		this.containerEl.className = 'modal';
-		this.contentEl = document.createElement('div');
-		this.contentEl.className = 'modal-content';
+		this.containerEl = document.createElement("div");
+		this.containerEl.className = "modal";
+		this.contentEl = document.createElement("div");
+		this.contentEl.className = "modal-content";
 		this.containerEl.appendChild(this.contentEl);
 	}
 
@@ -199,22 +209,22 @@ export class MockItemView extends MockComponent {
 	app: MockApp;
 	leaf: MockWorkspaceLeaf;
 	containerEl: HTMLElement;
-	
+
 	constructor(leaf: MockWorkspaceLeaf) {
 		super();
 		this.leaf = leaf;
 		this.app = leaf.view?.app || new MockApp();
-		this.containerEl = document.createElement('div');
-		this.containerEl.className = 'view-container';
+		this.containerEl = document.createElement("div");
+		this.containerEl.className = "view-container";
 		leaf.view = this;
 	}
 
 	getViewType(): string {
-		return 'mock-view';
+		return "mock-view";
 	}
 
 	getDisplayText(): string {
-		return 'Mock View';
+		return "Mock View";
 	}
 
 	async onOpen(): Promise<void> {
