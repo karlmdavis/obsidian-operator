@@ -1,19 +1,71 @@
 /* Obsidian Operator Plugin Styles */
 
-.obsidian-operator-modal {
-	width: 60%;
-	min-width: 400px;
-}
-
-.obsidian-operator-container {
+/* Modal container */
+.operator-modal-container {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	padding: 2rem;
 	gap: 1.5rem;
+	min-width: 400px;
 }
 
-.obsidian-operator-button {
+/* View container */
+.operator-view-container {
+	padding: 1rem;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.operator-view-title {
+	margin: 0 0 1rem 0;
+	text-align: center;
+	color: var(--text-normal);
+}
+
+.operator-view-ui {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+}
+
+.operator-view-status {
+	margin-top: 1rem;
+	padding: 0.5rem;
+	text-align: center;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Recording UI container */
+.operator-recording-ui {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
+}
+
+/* Duration display */
+.operator-duration {
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 2rem;
+	color: var(--text-normal);
+	font-weight: bold;
+	text-align: center;
+	min-height: 3rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Main record/pause button */
+.operator-record-button {
 	width: 200px;
 	height: 200px;
 	border-radius: 50%;
@@ -26,66 +78,148 @@
 	justify-content: center;
 	transition: all 0.3s ease;
 	background: transparent;
-	color: var(--text-normal);
+	position: relative;
+	outline: none;
 }
 
-.obsidian-operator-button:hover {
+.operator-record-button:hover {
 	transform: scale(1.05);
 }
 
-.obsidian-operator-button.record {
+.operator-record-button:focus {
+	box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+/* Button states */
+.operator-record-button.stopped {
 	border-color: #e74c3c;
 	color: #e74c3c;
 }
 
-.obsidian-operator-button.record:hover {
+.operator-record-button.stopped:hover {
 	background-color: rgba(231, 76, 60, 0.1);
 }
 
-.obsidian-operator-button.pause {
+.operator-record-button.recording {
 	border-color: #f39c12;
 	color: #f39c12;
+	animation: pulse-recording 2s infinite;
 }
 
-.obsidian-operator-button.pause:hover {
+.operator-record-button.recording:hover {
 	background-color: rgba(243, 156, 18, 0.1);
 }
 
-.obsidian-operator-count-display {
+/* Stop button (smaller, appears only when recording) */
+.operator-stop-button {
+	width: 80px;
+	height: 40px;
+	border-radius: 20px;
+	border: 2px solid #e74c3c;
+	background: transparent;
+	color: #e74c3c;
+	font-size: 0.9rem;
+	font-weight: bold;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	outline: none;
+}
+
+.operator-stop-button:hover {
+	background-color: rgba(231, 76, 60, 0.1);
+	transform: scale(1.05);
+}
+
+.operator-stop-button:focus {
+	box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+/* Random numbers display */
+.operator-randoms {
 	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-	font-size: 1.2rem;
+	font-size: 1rem;
 	color: var(--text-muted);
-	min-height: 2rem;
 	text-align: center;
-	line-height: 1.4;
-	word-wrap: break-word;
+	padding: 0.5rem;
+	min-height: 2rem;
 	max-width: 100%;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-secondary);
 }
 
-.obsidian-operator-view {
-	padding: 2rem;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+/* Disabled button state */
+.operator-record-button.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
-/* Mobile styles */
+.operator-record-button.disabled:hover {
+	transform: none;
+	background-color: transparent;
+}
+
+/* Status indicators */
+.operator-view-status.recording {
+	color: var(--text-success);
+	font-weight: bold;
+}
+
+.operator-view-status.blocked {
+	color: var(--text-error);
+	font-style: italic;
+}
+
+/* Pulse animation for recording state */
+@keyframes pulse-recording {
+	0%, 100% {
+		box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 0 20px rgba(243, 156, 18, 0);
+	}
+}
+
+/* Mobile and touch-friendly styles */
 @media (max-width: 768px) {
-	.obsidian-operator-modal {
-		width: 90%;
+	.operator-modal-container {
 		min-width: 300px;
-	}
-	
-	.obsidian-operator-button {
-		width: 150px;
-		height: 150px;
-		font-size: 1.2rem;
-	}
-	
-	.obsidian-operator-container {
 		padding: 1rem;
 		gap: 1rem;
+	}
+	
+	.operator-record-button {
+		width: 180px;
+		height: 180px;
+		font-size: 1.3rem;
+	}
+	
+	.operator-duration {
+		font-size: 1.5rem;
+		min-height: 2.5rem;
+	}
+	
+	.operator-randoms {
+		font-size: 0.9rem;
+	}
+	
+	.operator-view-container {
+		padding: 0.5rem;
+	}
+}
+
+/* Very large screens - make buttons bigger for car/voice use */
+@media (min-width: 1200px) {
+	.operator-record-button {
+		width: 250px;
+		height: 250px;
+		font-size: 1.8rem;
+	}
+	
+	.operator-duration {
+		font-size: 2.5rem;
+		min-height: 3.5rem;
 	}
 }

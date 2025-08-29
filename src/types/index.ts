@@ -1,24 +1,15 @@
 // Type definitions for Obsidian Operator plugin
 
-export interface RecordingState {
-	isRecording: boolean;
-	count: number;
-	initiatedBy: string | null; // View identifier that started recording
-}
-
-export interface CounterUpdate {
-	count: number;
-	timestamp: number;
-}
-
 export interface RecordingUICallbacks {
-	onStart: () => void;
-	onPause: () => void;
+	onRecord: () => void;
 	onStop: () => void;
 }
 
 export interface RecordingUIProps {
-	isRecording: boolean;
-	countDisplay: string;
+	isLocalRecording: boolean;  // This instance is recording
+	isGlobalRecording: boolean; // Someone is recording
+	canRecord: boolean;         // This instance can start recording
+	durationDisplay: string;
+	randomsDisplay: string;
 	callbacks: RecordingUICallbacks;
 }

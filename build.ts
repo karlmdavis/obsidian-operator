@@ -73,8 +73,9 @@ async function build() {
 			copyFileSync("styles.css", join(pluginPath, "styles.css"));
 		}
 		
-		// Add .hotreload file for hot-reload plugin support
-		writeFileSync(join(pluginPath, ".hotreload"), "");
+		// Touch .hotreload file for hot-reload plugin support
+		// Use current timestamp to ensure the file is updated
+		writeFileSync(join(pluginPath, ".hotreload"), new Date().toISOString());
 		console.log(`✓ Copied to ${pluginPath}`);
 	}
 
@@ -87,11 +88,25 @@ if (watch) {
 	// Initial build
 	await build();
 	
-	// Watch for changes
-	const watcher = require("fs").watch("./src", { recursive: true }, async (eventType: string, filename: string) => {
-		if (filename && filename.endsWith(".ts")) {
+	// Watch for changes in src and root files
+	const fs = require("fs");
+	
+	// Watch src directory
+	const srcWatcher = fs.watch("./src", { recursive: true }, async (eventType: string, filename: string) => {
+		if (filename && (filename.endsWith(".ts") || filename.endsWith(".js"))) {
 			console.log(`📝 ${filename} changed, rebuilding...`);
 			await build();
+		}
+	});
+	
+	// Watch root files (styles.css, manifest.json)
+	const rootFiles = ["styles.css", "manifest.json"];
+	rootFiles.forEach(file => {
+		if (fs.existsSync(file)) {
+			fs.watchFile(file, async () => {
+				console.log(`📝 ${file} changed, rebuilding...`);
+				await build();
+			});
 		}
 	});
 	

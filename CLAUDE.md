@@ -62,11 +62,23 @@ All changes to this repository follow a PR-based workflow:
 
 ### Build & Development Commands
 
-*Note: These commands will be established during phase 1 (Hello World Plugin) implementation:*
-- Build process: TBD (TypeScript compilation)
-- Testing: TBD (unit test framework)
-- Linting: TBD (ESLint or similar)
-- Local development: TBD (Obsidian plugin development setup)
+```bash
+# Building
+bun run build      # Production build (compiles and copies to vault, then exits)
+bun run dev        # Development mode with watch and hot reload (runs continuously)
+
+# Testing
+bun test           # Run all tests
+bun test:watch     # Run tests in watch mode
+
+# Code Quality
+bun run lint       # Check for linting issues
+bun run format     # Auto-format code
+bun run lint:fix   # Fix auto-fixable linting issues
+bun run typecheck  # TypeScript type checking
+```
+
+**Important**: When testing builds, use `bun run build` (not `bun run dev`) as it completes and exits. The `dev` command runs indefinitely in watch mode.
 
 ## Known Constraints
 
