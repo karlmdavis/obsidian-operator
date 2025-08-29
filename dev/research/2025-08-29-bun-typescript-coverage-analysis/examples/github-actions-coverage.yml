@@ -1,0 +1,311 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Improve performance by skipping unnecessary Git operations
+  DISABLE_ESLINT_PLUGIN: true
+  CI: true
+
+jobs:
+  coverage:
+    name: Test Coverage Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch full history for coverage comparison
+        fetch-depth: 0
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.bun/install/cache
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+
+    - name: Run linting
+      run: bun run lint
+
+    - name: Run type checking
+      run: bun run typecheck
+
+    - name: Run tests with coverage
+      run: bun test --coverage --coverage-reporter=lcov,json --coverage-dir=./coverage
+
+    - name: Check coverage thresholds
+      run: |
+        echo "Checking coverage thresholds..."
+        COVERAGE_JSON="./coverage/coverage-summary.json"
+        
+        if [ ! -f "$COVERAGE_JSON" ]; then
+          echo "Coverage summary not found!"
+          exit 1
+        fi
+        
+        # Extract coverage percentages
+        LINES_PCT=$(cat $COVERAGE_JSON | jq '.total.lines.pct')
+        FUNCTIONS_PCT=$(cat $COVERAGE_JSON | jq '.total.functions.pct')
+        BRANCHES_PCT=$(cat $COVERAGE_JSON | jq '.total.branches.pct')
+        STATEMENTS_PCT=$(cat $COVERAGE_JSON | jq '.total.statements.pct')
+        
+        echo "Coverage Results:"
+        echo "  Lines: ${LINES_PCT}%"
+        echo "  Functions: ${FUNCTIONS_PCT}%"  
+        echo "  Branches: ${BRANCHES_PCT}%"
+        echo "  Statements: ${STATEMENTS_PCT}%"
+        
+        # Check thresholds
+        FAILED=false
+        
+        if (( $(echo "$LINES_PCT < 80" | bc -l) )); then
+          echo "❌ Lines coverage ${LINES_PCT}% is below 80% threshold"
+          FAILED=true
+        fi
+        
+        if (( $(echo "$FUNCTIONS_PCT < 80" | bc -l) )); then
+          echo "❌ Functions coverage ${FUNCTIONS_PCT}% is below 80% threshold"
+          FAILED=true
+        fi
+        
+        if (( $(echo "$BRANCHES_PCT < 75" | bc -l) )); then
+          echo "❌ Branches coverage ${BRANCHES_PCT}% is below 75% threshold"
+          FAILED=true
+        fi
+        
+        if (( $(echo "$STATEMENTS_PCT < 80" | bc -l) )); then
+          echo "❌ Statements coverage ${STATEMENTS_PCT}% is below 80% threshold"
+          FAILED=true
+        fi
+        
+        if [ "$FAILED" = true ]; then
+          exit 1
+        fi
+        
+        echo "✅ All coverage thresholds passed"
+
+    - name: Check diff coverage (PR only)
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Checking coverage for changed files..."
+        
+        # Get list of changed TypeScript files
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(ts|tsx)$' | grep -v '\.test\.' | grep -v '\.spec\.' || true)
+        
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "No TypeScript files changed"
+          exit 0
+        fi
+        
+        echo "Changed files:"
+        echo "$CHANGED_FILES" | sed 's/^/  - /'
+        
+        # Run coverage only on changed files
+        echo "$CHANGED_FILES" | xargs bun test --coverage --coverage-include 2>/dev/null || {
+          echo "⚠️ Could not run coverage on changed files individually"
+          echo "Using full coverage report for analysis"
+        }
+        
+        # For now, we'll rely on the full coverage report
+        # In a more advanced setup, you could parse LCOV data to extract
+        # coverage for specific files
+        
+        echo "✅ Diff coverage check completed"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: obsidian-operator-coverage
+        fail_ci_if_error: false # Don't fail if Codecov is down
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage to Coveralls (alternative)
+      if: failure() # Run if Codecov fails
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./coverage/lcov.info
+
+    - name: Generate coverage badge
+      if: github.ref == 'refs/heads/main'
+      run: |
+        COVERAGE_PCT=$(cat ./coverage/coverage-summary.json | jq -r '.total.lines.pct')
+        
+        # Determine badge color based on coverage
+        if (( $(echo "$COVERAGE_PCT >= 90" | bc -l) )); then
+          COLOR="brightgreen"
+        elif (( $(echo "$COVERAGE_PCT >= 80" | bc -l) )); then
+          COLOR="green"
+        elif (( $(echo "$COVERAGE_PCT >= 70" | bc -l) )); then
+          COLOR="yellow"
+        elif (( $(echo "$COVERAGE_PCT >= 60" | bc -l) )); then
+          COLOR="orange"
+        else
+          COLOR="red"
+        fi
+        
+        echo "Coverage: ${COVERAGE_PCT}% (${COLOR})"
+        echo "COVERAGE_PCT=${COVERAGE_PCT}" >> $GITHUB_ENV
+        echo "BADGE_COLOR=${COLOR}" >> $GITHUB_ENV
+
+    - name: Comment PR with coverage report
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          try {
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            
+            const formatPercentage = (pct) => {
+              const color = pct >= 90 ? '🟢' : pct >= 80 ? '🟡' : pct >= 70 ? '🟠' : '🔴';
+              return `${color} ${pct}%`;
+            };
+            
+            const comment = `## 📊 Coverage Report
+            
+            | Type | Coverage | Threshold | Status |
+            |------|----------|-----------|--------|
+            | **Lines** | ${formatPercentage(coverage.total.lines.pct)} | 80% | ${coverage.total.lines.pct >= 80 ? '✅' : '❌'} |
+            | **Functions** | ${formatPercentage(coverage.total.functions.pct)} | 80% | ${coverage.total.functions.pct >= 80 ? '✅' : '❌'} |
+            | **Branches** | ${formatPercentage(coverage.total.branches.pct)} | 75% | ${coverage.total.branches.pct >= 75 ? '✅' : '❌'} |
+            | **Statements** | ${formatPercentage(coverage.total.statements.pct)} | 80% | ${coverage.total.statements.pct >= 80 ? '✅' : '❌'} |
+            
+            ### 📈 Coverage Details
+            
+            - **Total Lines**: ${coverage.total.lines.covered}/${coverage.total.lines.total}
+            - **Total Functions**: ${coverage.total.functions.covered}/${coverage.total.functions.total}
+            - **Total Branches**: ${coverage.total.branches.covered}/${coverage.total.branches.total}
+            
+            <details>
+            <summary>📋 View detailed coverage report</summary>
+            
+            \`\`\`
+            Files with low coverage (< 80%):
+            \`\`\`
+            
+            ${Object.entries(coverage)
+              .filter(([key]) => key !== 'total')
+              .map(([file, data]) => {
+                if (data.lines.pct < 80) {
+                  return \`- \${file}: \${data.lines.pct}% lines\`;
+                }
+              })
+              .filter(Boolean)
+              .join('\\n') || '*All files meet coverage threshold* ✅'}
+            
+            </details>
+            
+            ---
+            *Coverage report generated by [Bun](https://bun.sh) • [View full report on Codecov](https://codecov.io/github/${{ github.repository }})*`;
+            
+            // Find existing coverage comment
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.body.includes('📊 Coverage Report')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.error('Error reading coverage file:', error);
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Unable to generate coverage report. Please check the workflow logs.'
+            });
+          }
+
+    - name: Archive coverage reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-reports
+        path: |
+          coverage/
+          coverage-html/
+        retention-days: 30
+
+  # Separate job for coverage trend analysis
+  coverage-trends:
+    name: Coverage Trends
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download coverage reports
+      uses: actions/download-artifact@v3
+      with:
+        name: coverage-reports
+        path: ./coverage
+
+    - name: Analyze coverage trends
+      run: |
+        echo "Analyzing coverage trends..."
+        
+        # This is a placeholder for trend analysis
+        # In practice, you'd store historical coverage data
+        # and compare with previous runs
+        
+        CURRENT_COVERAGE=$(cat ./coverage/coverage-summary.json | jq '.total.lines.pct')
+        echo "Current coverage: ${CURRENT_COVERAGE}%"
+        
+        # Store coverage data for trend analysis
+        mkdir -p .coverage-history
+        echo "{\"date\": \"$(date -I)\", \"coverage\": $CURRENT_COVERAGE, \"commit\": \"${{ github.sha }}\"}" >> .coverage-history/$(date -I).json
+        
+        echo "✅ Coverage trend analysis completed"
+
+    - name: Update coverage badge
+      run: |
+        echo "Coverage badge would be updated here"
+        # Implementation depends on your badge service (shields.io, etc.)
