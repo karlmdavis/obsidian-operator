@@ -4,6 +4,110 @@ Thank you for your interest in contributing to **Obsidian Operator**.
 This project is still experimental, but the intent is to create a plugin that improves safe, hands-free capture of
   thoughts in Obsidian.
 
+## Development Setup
+
+### Prerequisites
+
+- **Bun** (v1.0+): Install from [bun.sh](https://bun.sh)
+- **Node.js** (v18+): For compatibility with some tools
+- **Obsidian**: Desktop app for testing the plugin
+
+### Initial Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/karlmdavis/obsidian-operator.git
+   cd obsidian-operator
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   bun install
+   ```
+
+3. **Build the plugin**:
+   ```bash
+   bun run build   # Production build
+   bun run dev     # Development build with watch mode
+   ```
+
+### Installing the Plugin Locally
+
+#### Manual Installation
+
+1. Build the plugin: `bun run build`
+2. Copy the following files to your vault's plugin folder (`<vault>/.obsidian/plugins/obsidian-operator/`):
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+3. Reload Obsidian or toggle the plugin in Settings → Community plugins
+
+#### Automatic Installation with Hot Reload
+
+1. **Install the Hot Reload plugin** in Obsidian:
+   - Community plugins → Browse → Search for "Hot Reload" → Install
+
+2. **Set your vault path** (choose one option):
+   
+   Option A - Environment variable:
+   ```bash
+   export OBSIDIAN_PLUGINS_PATH="/path/to/your/vault/.obsidian/plugins"
+   ```
+   
+   Option B - Create `.env` file in project root:
+   ```bash
+   OBSIDIAN_PLUGINS_PATH=/path/to/your/vault/.obsidian/plugins
+   ```
+
+3. **Run development build**:
+   ```bash
+   bun run dev
+   ```
+   
+   This single command handles everything:
+   - Watches for changes in `src/`
+   - Rebuilds automatically on changes
+   - Automatically installs to your vault (no manual copying needed)
+   - Creates `.hotreload` file to trigger the Hot Reload plugin
+   - Obsidian will automatically reload the plugin when changes are detected
+
+### Development Commands
+
+```bash
+# Building
+bun run dev        # Watch mode with hot reload
+bun run build      # Production build
+
+# Testing
+bun test           # Run all tests
+bun test:watch     # Run tests in watch mode
+
+# Code Quality
+bun run lint       # Check for linting issues
+bun run format     # Auto-format code
+bun run lint:fix   # Fix auto-fixable linting issues
+bun run typecheck  # TypeScript type checking
+```
+
+### Testing
+
+Tests use Bun's built-in test runner with happy-dom for DOM testing:
+
+```typescript
+import { test, expect } from "bun:test";
+
+test("example test", () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+Run tests with:
+```bash
+bun test                    # Run all tests
+bun test path/to/file       # Run specific test file
+bun test --watch            # Watch mode
+```
+
 ## Contribution Guidelines
 
 ### Style & Formatting
@@ -18,7 +122,46 @@ This project is still experimental, but the intent is to create a plugin that im
       so the second part is indented.
     ```
     
-- Code and configuration should use the repository’s provided linters and formatters.
+- Code and configuration should use the repository's provided linters and formatters.
+
+### Linting Policy
+
+**Strict linting enforcement is mandatory** - all code must pass linting without errors or warnings.
+
+#### When Lint Suppressions Are Acceptable
+
+Use `// biome-ignore lint: descriptive reason` only in these specific cases:
+
+1. **Mock files**: When simulating external APIs that require `any` types
+   ```typescript
+   // biome-ignore lint: Mock API requires any type
+   someMethod(param: any): any {
+   ```
+
+2. **Test files accessing private properties**:
+   ```typescript
+   // biome-ignore lint: Testing private properties requires any cast
+   (instance as any).privateProperty = testValue;
+   ```
+
+3. **Test utility arrays with flexible data**:
+   ```typescript
+   // biome-ignore lint: Test array needs any type for flexible data collection  
+   const testData: any[] = [];
+   ```
+
+#### Never Acceptable
+
+- Disabling linting rules globally in configuration files
+- Using suppressions to avoid fixing legitimate code quality issues
+- Suppressions without clear, descriptive reasons
+- Suppressions in production code without strong justification
+
+#### How to Use Suppressions
+
+- Always provide a clear, descriptive reason explaining **why** the suppression is necessary
+- Place the comment directly above the line that needs suppression
+- Use specific rule suppressions when possible rather than blanket `lint` suppressions
 
 ### Design Principles
 
@@ -34,6 +177,8 @@ This project is still experimental, but the intent is to create a plugin that im
 - Testing: unit tests required, with integration tests (e.g. Playwright) encouraged when possible.
 - CI/CD: use GitHub Actions to run tests, lint, build, and package.
 - Local builds: contributors should be able to build, test, and lint locally without extra setup.
+- Build system: **Bun** for fast builds, testing, and dependency management.
+- Code quality: **Biome** for unified linting and formatting.
 
 ### Constraints
 
