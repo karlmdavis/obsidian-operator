@@ -53,25 +53,28 @@ test("GlobalRecordingState - subscription", () => {
 	let notificationCount = 0;
 	let lastIsRecording = false;
 	let lastInstanceId: string | null = null;
+	let lastState: string = "idle";
 
-	const unsubscribe = state.subscribe((isRecording, instanceId) => {
+	const unsubscribe = state.subscribe((stateInfo) => {
 		notificationCount++;
-		lastIsRecording = isRecording;
-		lastInstanceId = instanceId;
+		lastIsRecording = stateInfo.isRecording;
+		lastInstanceId = stateInfo.recordingInstanceId;
+		lastState = stateInfo.state;
 	});
 
 	// Start recording
 	state.tryStartRecording("instance-1");
 	expect(notificationCount).toBe(1);
 	expect(lastIsRecording).toBe(true);
-	// biome-ignore lint: Type assertion needed for test assertion
-	expect(lastInstanceId as any).toBe("instance-1");
+	expect(lastInstanceId).toBe("instance-1");
+	expect(lastState).toBe("recording");
 
 	// Stop recording
 	state.stopRecording("instance-1");
 	expect(notificationCount).toBe(2);
 	expect(lastIsRecording).toBe(false);
 	expect(lastInstanceId).toBe(null);
+	expect(lastState).toBe("idle");
 
 	// Unsubscribe
 	unsubscribe();

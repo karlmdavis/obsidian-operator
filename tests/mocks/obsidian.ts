@@ -92,8 +92,8 @@ export class MockPlugin extends MockComponent {
 
 	// biome-ignore lint: Mock API requires any type
 	private commands = new Map<string, any>();
-	private ribbonIcons = new Map<string, HTMLElement>();
-	private statusBarItems: HTMLElement[] = [];
+	private ribbonIcons = new Map<string, MockHTMLElement>();
+	private statusBarItems: MockHTMLElement[] = [];
 
 	constructor(app: MockApp) {
 		super();
@@ -110,18 +110,18 @@ export class MockPlugin extends MockComponent {
 		this.commands.set(command.id, command);
 	}
 
-	addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => void): HTMLElement {
-		const element = document.createElement("div");
-		element.className = "ribbon-icon";
+	addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => void): MockHTMLElement {
+		const element = new MockHTMLElement();
+		element.addClass("ribbon-icon");
 		element.title = title;
-		element.onclick = (evt) => callback(evt as MouseEvent);
+		element.onclick = () => callback(new MouseEvent("click") as MouseEvent);
 		this.ribbonIcons.set(icon, element);
 		return element;
 	}
 
-	addStatusBarItem(): HTMLElement {
-		const element = document.createElement("div");
-		element.className = "status-bar-item";
+	addStatusBarItem(): MockHTMLElement {
+		const element = new MockHTMLElement();
+		element.addClass("status-bar-item");
 		this.statusBarItems.push(element);
 		return element;
 	}
@@ -158,40 +158,125 @@ export class MockPlugin extends MockComponent {
 	clickRibbonIcon(icon: string): void {
 		const element = this.ribbonIcons.get(icon);
 		if (element?.onclick) {
-			// biome-ignore lint: Mock API requires any type
-			element.onclick(new MouseEvent("click") as any);
+			element.onclick();
+		}
+	}
+}
+
+// Mock Scope for keyboard shortcuts in modals
+export class MockScope {
+	// biome-ignore lint: Mock API requires any type
+	private shortcuts = new Map<string, any>();
+
+	register(modifiers: string[], key: string, callback: () => void): void {
+		const shortcutKey = `${modifiers.join("+")}-${key}`;
+		this.shortcuts.set(shortcutKey, { modifiers, key, callback });
+	}
+
+	// Test helper to get registered shortcuts
+	getShortcut(modifiers: string[], key: string) {
+		const shortcutKey = `${modifiers.join("+")}-${key}`;
+		return this.shortcuts.get(shortcutKey);
+	}
+
+	// Test helper to trigger shortcuts
+	triggerShortcut(modifiers: string[], key: string): void {
+		const shortcut = this.getShortcut(modifiers, key);
+		if (shortcut) {
+			shortcut.callback();
+		}
+	}
+}
+
+// Mock HTMLElement that can be extended for DOM testing
+export class MockHTMLElement {
+	private children: MockHTMLElement[] = [];
+	private attributes: Record<string, string> = {};
+	private classes: string[] = [];
+	public textContent = "";
+	public disabled = false;
+	public onclick: (() => void) | null = null;
+	public title = "";
+
+	createEl(tagName: string, options?: { cls?: string; text?: string }): MockHTMLElement {
+		const element = new MockHTMLElement();
+		if (options?.cls) {
+			element.classes = options.cls.split(" ");
+		}
+		if (options?.text) {
+			element.textContent = options.text;
+		}
+		this.children.push(element);
+		return element;
+	}
+
+	empty(): void {
+		this.children = [];
+		this.textContent = "";
+	}
+
+	addClass(className: string): void {
+		if (!this.classes.includes(className)) {
+			this.classes.push(className);
+		}
+	}
+
+	get classList() {
+		return {
+			add: (className: string) => this.addClass(className),
+			contains: (className: string) => this.classes.includes(className),
+		};
+	}
+
+	setAttribute(name: string, value: string): void {
+		this.attributes[name] = value;
+	}
+
+	getAttribute(name: string): string | null {
+		return this.attributes[name] || null;
+	}
+
+	// Testing helpers
+	hasClass(className: string): boolean {
+		return this.classes.includes(className);
+	}
+
+	getChildren(): MockHTMLElement[] {
+		return this.children;
+	}
+
+	click(): void {
+		if (this.onclick && !this.disabled) {
+			this.onclick();
 		}
 	}
 }
 
 export class MockModal extends MockComponent {
 	app: MockApp;
-	containerEl: HTMLElement;
-	contentEl: HTMLElement;
-
-	private isOpen = false;
+	containerEl: MockHTMLElement;
+	contentEl: MockHTMLElement;
+	scope: MockScope;
+	isOpen = false;
 
 	constructor(app: MockApp) {
 		super();
 		this.app = app;
-		this.containerEl = document.createElement("div");
-		this.containerEl.className = "modal";
-		this.contentEl = document.createElement("div");
-		this.contentEl.className = "modal-content";
-		this.containerEl.appendChild(this.contentEl);
+		this.containerEl = new MockHTMLElement();
+		this.containerEl.addClass("modal");
+		this.contentEl = new MockHTMLElement();
+		this.contentEl.addClass("modal-content");
+		this.containerEl.getChildren().push(this.contentEl);
+		this.scope = new MockScope();
 	}
 
 	open(): void {
 		this.isOpen = true;
-		document.body.appendChild(this.containerEl);
 		this.onOpen();
 	}
 
 	close(): void {
 		this.isOpen = false;
-		if (this.containerEl.parentNode) {
-			this.containerEl.parentNode.removeChild(this.containerEl);
-		}
 		this.onClose();
 	}
 
@@ -202,24 +287,19 @@ export class MockModal extends MockComponent {
 	onClose(): void {
 		// Override in subclasses
 	}
-
-	// Test helpers
-	isModalOpen(): boolean {
-		return this.isOpen;
-	}
 }
 
 export class MockItemView extends MockComponent {
 	app: MockApp;
 	leaf: MockWorkspaceLeaf;
-	containerEl: HTMLElement;
+	containerEl: MockHTMLElement;
 
 	constructor(leaf: MockWorkspaceLeaf) {
 		super();
 		this.leaf = leaf;
 		this.app = leaf.view?.app || new MockApp();
-		this.containerEl = document.createElement("div");
-		this.containerEl.className = "view-container";
+		this.containerEl = new MockHTMLElement();
+		this.containerEl.addClass("view-container");
 		leaf.view = this;
 	}
 
@@ -248,3 +328,11 @@ export type Modal = MockModal;
 export type ItemView = MockItemView;
 export type WorkspaceLeaf = MockWorkspaceLeaf;
 export type Workspace = MockWorkspace;
+export type Scope = MockScope;
+export type HTMLElement = MockHTMLElement;
+
+// Also need to fix private property references
+interface MockPluginInternal {
+	ribbonIcons: Map<string, MockHTMLElement>;
+	statusBarItems: MockHTMLElement[];
+}
