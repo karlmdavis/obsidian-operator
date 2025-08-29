@@ -17,12 +17,36 @@ const watch = args.includes("--watch");
 
 /**
  * Validates the build environment and provides helpful error messages.
- * Checks for required tools, directories, and environment variables.
+ * Checks for required tools, directories, environment variables, and plugin manifest.
  */
 function validateEnvironment(): void {
 	// Check if we're in the right directory (has manifest.json)
 	if (!existsSync("manifest.json")) {
 		console.error("❌ Build failed: manifest.json not found. Are you running from the project root?");
+		process.exit(1);
+	}
+
+	// Validate manifest.json structure
+	try {
+		const manifest = require("./manifest.json");
+		const requiredFields = ["id", "name", "version", "minAppVersion"];
+		
+		for (const field of requiredFields) {
+			if (!manifest[field]) {
+				console.error(`❌ Build failed: manifest.json missing required field: ${field}`);
+				process.exit(1);
+			}
+		}
+		
+		// Validate version format (semver-like)
+		if (!/^\d+\.\d+\.\d+/.test(manifest.version)) {
+			console.error(`❌ Build failed: manifest.json version should follow semver format (x.y.z), got: ${manifest.version}`);
+			process.exit(1);
+		}
+		
+	} catch (error) {
+		console.error("❌ Build failed: Cannot parse manifest.json");
+		console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
 		process.exit(1);
 	}
 
@@ -104,6 +128,89 @@ function safeWriteFile(filepath: string, content: string): boolean {
 }
 
 /**
+ * Runs TypeScript type checking and returns whether it succeeded.
+ * Provides detailed error reporting for type issues.
+ */
+async function runTypeCheck(): Promise<boolean> {
+	console.log("🔍 Running TypeScript type check...");
+	
+	try {
+		// For production builds, use production TypeScript config that excludes test files
+		const args = prod 
+			? ["tsc", "--noEmit", "--skipLibCheck", "--project", "tsconfig.prod.json"]
+			: ["bun", "run", "typecheck"];
+		
+		const proc = Bun.spawn(args, {
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		
+		const result = await proc.exited;
+		
+		if (result !== 0) {
+			const stderr = await new Response(proc.stderr).text();
+			const stdout = await new Response(proc.stdout).text();
+			
+			console.error("❌ TypeScript type check failed:");
+			if (stderr) console.error(stderr);
+			if (stdout) console.error(stdout);
+			
+			console.error("\n💡 Fix type errors before continuing the build");
+			return false;
+		}
+		
+		console.log("✅ TypeScript type check passed");
+		return true;
+	} catch (error) {
+		console.error("❌ Failed to run TypeScript type check:");
+		console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+		return false;
+	}
+}
+
+/**
+ * Validates the generated plugin files to ensure they meet Obsidian's requirements.
+ */
+function validatePluginOutput(): boolean {
+	// Check that main.js was generated and has content
+	if (!existsSync("main.js")) {
+		console.error("❌ Build output validation failed: main.js not found");
+		return false;
+	}
+	
+	try {
+		const mainContent = require("fs").readFileSync("main.js", "utf-8");
+		
+		// Basic sanity checks for the generated plugin
+		if (mainContent.length < 100) {
+			console.error("❌ Build output validation failed: main.js appears to be empty or too small");
+			return false;
+		}
+		
+		// Check for essential plugin patterns (exports default, extends Plugin, etc.)
+		// Bun uses CommonJS format, so we need to check for different export patterns
+		const hasDefaultExport = /export\s*{\s*\w+\s+as\s+default\s*}|export\s+default|module\.exports\s*=/.test(mainContent);
+		const hasPluginClass = /extends\s+Plugin|class\s+\w+Plugin|Plugin\s*{/.test(mainContent);
+		
+		if (!hasDefaultExport) {
+			console.warn("⚠️  Warning: main.js does not appear to have a default export");
+		}
+		
+		if (!hasPluginClass) {
+			console.warn("⚠️  Warning: main.js does not appear to extend the Plugin class");
+		}
+		
+		console.log(`✅ Plugin output validation passed (${Math.round(mainContent.length / 1024)}KB)`);
+		return true;
+		
+	} catch (error) {
+		console.error("❌ Build output validation failed:");
+		console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+		return false;
+	}
+}
+
+/**
  * Provides helpful suggestions for common development environment setup issues.
  */
 function suggestEnvironmentSetup(): void {
@@ -143,6 +250,7 @@ const buildConfig = {
 };
 
 async function build() {
+	const buildStartTime = Date.now();
 	console.log(prod ? "🏗️  Building for production..." : "🔨 Building for development...");
 	
 	// Validate environment before building
@@ -153,7 +261,21 @@ async function build() {
 		process.exit(1);
 	}
 	
+	// Run TypeScript type checking for production builds or if explicitly enabled
+	if (prod || process.env.TYPECHECK_ON_BUILD === "true") {
+		const typeCheckStartTime = Date.now();
+		
+		if (!(await runTypeCheck())) {
+			console.error("❌ Build aborted due to type check failures");
+			process.exit(1);
+		}
+		
+		const typeCheckTime = Date.now() - typeCheckStartTime;
+		console.log(`⏱️  Type check completed in ${typeCheckTime}ms`);
+	}
+	
 	// Perform the build
+	const bundleStartTime = Date.now();
 	let result;
 	try {
 		result = await Bun.build(buildConfig);
@@ -163,6 +285,8 @@ async function build() {
 		console.error("   This usually indicates a configuration or dependency issue");
 		process.exit(1);
 	}
+	
+	const bundleTime = Date.now() - bundleStartTime;
 	
 	if (!result.success) {
 		console.error("❌ Build failed:");
@@ -175,6 +299,8 @@ async function build() {
 		console.error("   - Run 'bun run typecheck' for detailed type errors");
 		process.exit(1);
 	}
+	
+	console.log(`⏱️  Bundling completed in ${bundleTime}ms`);
 
 	// Write the bundled output with banner
 	const mainOutput = result.outputs.find(output => output.path.endsWith("main.js"));
@@ -192,6 +318,12 @@ async function build() {
 		}
 	} else {
 		console.error("❌ Build succeeded but main.js output not found in result");
+		process.exit(1);
+	}
+	
+	// Validate the plugin output
+	if (!validatePluginOutput()) {
+		console.error("❌ Build aborted due to output validation failures");
 		process.exit(1);
 	}
 
@@ -250,7 +382,8 @@ async function build() {
 	// Provide helpful environment setup suggestions
 	suggestEnvironmentSetup();
 
-	console.log("✅ Build complete!");
+	const totalBuildTime = Date.now() - buildStartTime;
+	console.log(`✅ Build complete! (${totalBuildTime}ms total)`);
 }
 
 if (watch) {
@@ -264,22 +397,47 @@ if (watch) {
 		console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
 	}
 	
-	// Watch for changes in src and root files
+	// Watch for changes in src and root files with debouncing
 	const fs = require("fs");
 	let watchers: any[] = [];
+	let rebuildTimer: NodeJS.Timeout | null = null;
+	let pendingChanges = new Set<string>();
+	
+	// Debounced rebuild function to prevent excessive rebuilds
+	const debouncedBuild = async () => {
+		if (pendingChanges.size === 0) return;
+		
+		const changes = Array.from(pendingChanges);
+		pendingChanges.clear();
+		
+		console.log(`📝 ${changes.length} file(s) changed: ${changes.join(", ")}`);
+		console.log("⏱️  Rebuilding...");
+		
+		try {
+			await build();
+		} catch (error) {
+			console.error("❌ Rebuild failed:");
+			console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+			console.error("   Continuing to watch for changes...");
+		}
+	};
+	
+	// Function to schedule a debounced rebuild
+	const scheduleRebuild = (filename: string) => {
+		pendingChanges.add(filename);
+		
+		if (rebuildTimer) {
+			clearTimeout(rebuildTimer);
+		}
+		
+		rebuildTimer = setTimeout(debouncedBuild, 150); // 150ms debounce delay
+	};
 	
 	try {
 		// Watch src directory
 		const srcWatcher = fs.watch("./src", { recursive: true }, async (eventType: string, filename: string) => {
 			if (filename && (filename.endsWith(".ts") || filename.endsWith(".js"))) {
-				console.log(`📝 ${filename} changed, rebuilding...`);
-				try {
-					await build();
-				} catch (error) {
-					console.error("❌ Rebuild failed:");
-					console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
-					console.error("   Continuing to watch for changes...");
-				}
+				scheduleRebuild(`src/${filename}`);
 			}
 		});
 		watchers.push(srcWatcher);
@@ -289,14 +447,7 @@ if (watch) {
 		rootFiles.forEach(file => {
 			if (fs.existsSync(file)) {
 				const fileWatcher = fs.watchFile(file, async () => {
-					console.log(`📝 ${file} changed, rebuilding...`);
-					try {
-						await build();
-					} catch (error) {
-						console.error("❌ Rebuild failed:");
-						console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
-						console.error("   Continuing to watch for changes...");
-					}
+					scheduleRebuild(file);
 				});
 				watchers.push(() => fs.unwatchFile(file));
 			}
@@ -314,6 +465,13 @@ if (watch) {
 	// Graceful shutdown handling
 	process.on("SIGINT", () => {
 		console.log("\n👋 Stopping watchers...");
+		
+		// Clear any pending rebuild timer
+		if (rebuildTimer) {
+			clearTimeout(rebuildTimer);
+		}
+		
+		// Clean up file watchers
 		watchers.forEach(watcher => {
 			try {
 				if (typeof watcher === "function") {
