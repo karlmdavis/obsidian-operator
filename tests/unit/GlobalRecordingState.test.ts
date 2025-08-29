@@ -64,6 +64,7 @@ test("GlobalRecordingState - subscription", () => {
 	state.tryStartRecording("instance-1");
 	expect(notificationCount).toBe(1);
 	expect(lastIsRecording).toBe(true);
+	// biome-ignore lint: Type assertion needed for test assertion
 	expect(lastInstanceId as any).toBe("instance-1");
 
 	// Stop recording

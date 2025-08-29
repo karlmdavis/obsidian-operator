@@ -5,8 +5,10 @@ export class MockApp {
 }
 
 export class MockWorkspace {
+	// biome-ignore lint: Mock API requires any type
 	activeView: any = null;
 
+	// biome-ignore lint: Mock API requires any type
 	getActiveViewOfType(type: any) {
 		return this.activeView;
 	}
@@ -19,18 +21,22 @@ export class MockPlugin {
 		return { addClass: () => {} };
 	}
 
+	// biome-ignore lint: Mock API requires any type
 	addCommand(command: any) {
 		// Mock command registration
 	}
 
+	// biome-ignore lint: Mock API requires any type
 	addSettingTab(tab: any) {
 		// Mock settings tab
 	}
 
+	// biome-ignore lint: Mock API requires any type
 	loadData(): Promise<any> {
 		return Promise.resolve({});
 	}
 
+	// biome-ignore lint: Mock API requires any type
 	saveData(data: any): Promise<void> {
 		return Promise.resolve();
 	}

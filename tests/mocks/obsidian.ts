@@ -30,6 +30,7 @@ export class MockComponent implements MockEventTarget {
 }
 
 export class MockWorkspaceLeaf {
+	// biome-ignore lint: Mock API requires any type
 	view: any = null;
 
 	setViewState(viewState: { type: string }): Promise<void> {
@@ -66,6 +67,7 @@ export class MockWorkspace {
 }
 
 export class MockVault {
+	// biome-ignore lint: Mock API requires any type
 	create(path: string, data: string): Promise<any> {
 		return Promise.resolve({ path, content: data });
 	}
@@ -82,16 +84,13 @@ export class MockVault {
 export class MockApp {
 	workspace = new MockWorkspace();
 	vault = new MockVault();
-
-	constructor() {
-		// Initialize mock app
-	}
 }
 
 export class MockPlugin extends MockComponent {
 	app: MockApp;
 	manifest = { id: "test-plugin", name: "Test Plugin", version: "1.0.0" };
 
+	// biome-ignore lint: Mock API requires any type
 	private commands = new Map<string, any>();
 	private ribbonIcons = new Map<string, HTMLElement>();
 	private statusBarItems: HTMLElement[] = [];
@@ -105,6 +104,7 @@ export class MockPlugin extends MockComponent {
 		id: string;
 		name: string;
 		callback?: () => void;
+		// biome-ignore lint: Mock API requires any type
 		editorCallback?: (editor: any, view: any) => void;
 	}): void {
 		this.commands.set(command.id, command);
@@ -126,9 +126,12 @@ export class MockPlugin extends MockComponent {
 		return element;
 	}
 
+	// biome-ignore lint: Mock API requires any type
 	registerView(type: string, viewCreator: (leaf: MockWorkspaceLeaf) => any): void {
 		// Mock view registration - store the creator function
+		// biome-ignore lint: Mock API requires any type
 		(this as any)._viewCreators = (this as any)._viewCreators || {};
+		// biome-ignore lint: Mock API requires any type
 		(this as any)._viewCreators[type] = viewCreator;
 	}
 
@@ -155,6 +158,7 @@ export class MockPlugin extends MockComponent {
 	clickRibbonIcon(icon: string): void {
 		const element = this.ribbonIcons.get(icon);
 		if (element?.onclick) {
+			// biome-ignore lint: Mock API requires any type
 			element.onclick(new MouseEvent("click") as any);
 		}
 	}

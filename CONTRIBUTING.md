@@ -122,7 +122,46 @@ bun test --watch            # Watch mode
       so the second part is indented.
     ```
     
-- Code and configuration should use the repository’s provided linters and formatters.
+- Code and configuration should use the repository's provided linters and formatters.
+
+### Linting Policy
+
+**Strict linting enforcement is mandatory** - all code must pass linting without errors or warnings.
+
+#### When Lint Suppressions Are Acceptable
+
+Use `// biome-ignore lint: descriptive reason` only in these specific cases:
+
+1. **Mock files**: When simulating external APIs that require `any` types
+   ```typescript
+   // biome-ignore lint: Mock API requires any type
+   someMethod(param: any): any {
+   ```
+
+2. **Test files accessing private properties**:
+   ```typescript
+   // biome-ignore lint: Testing private properties requires any cast
+   (instance as any).privateProperty = testValue;
+   ```
+
+3. **Test utility arrays with flexible data**:
+   ```typescript
+   // biome-ignore lint: Test array needs any type for flexible data collection  
+   const testData: any[] = [];
+   ```
+
+#### Never Acceptable
+
+- Disabling linting rules globally in configuration files
+- Using suppressions to avoid fixing legitimate code quality issues
+- Suppressions without clear, descriptive reasons
+- Suppressions in production code without strong justification
+
+#### How to Use Suppressions
+
+- Always provide a clear, descriptive reason explaining **why** the suppression is necessary
+- Place the comment directly above the line that needs suppression
+- Use specific rule suppressions when possible rather than blanket `lint` suppressions
 
 ### Design Principles
 

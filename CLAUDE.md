@@ -46,7 +46,8 @@ When reading `CLAUDE.md`, please also be sure to read `CONTRIBUTING.md`.
 - Wrapped lines indented by two spaces
 
 ### TypeScript Conventions
-- Follow established linters and formatters (to be configured in phase 1)
+- **Strict linting enforcement**: All linting rules must remain enabled and issues addressed directly
+- Never disable or bypass linting rules globally - use targeted suppressions only when absolutely necessary
 - Unit test coverage required for all functions
 - Use Obsidian Plugin API patterns and conventions
 
@@ -77,6 +78,15 @@ bun run format     # Auto-format code
 bun run lint:fix   # Fix auto-fixable linting issues
 bun run typecheck  # TypeScript type checking
 ```
+
+### Code Quality Standards
+- **Linting is mandatory**: All code must pass linting without errors
+- Use `// biome-ignore lint: reason` for targeted suppressions only when absolutely necessary
+- Common acceptable suppression cases:
+  - Mock files requiring `any` types to simulate external APIs
+  - Test files accessing private properties for testing purposes
+  - Type assertions in specific testing scenarios
+- Always provide clear, descriptive reasons for any lint suppressions
 
 **Important**: When testing builds, use `bun run build` (not `bun run dev`) as it completes and exits. The `dev` command runs indefinitely in watch mode.
 
