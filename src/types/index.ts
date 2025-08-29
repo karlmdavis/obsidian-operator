@@ -6,9 +6,9 @@ export interface RecordingUICallbacks {
 }
 
 export interface RecordingUIProps {
-	isLocalRecording: boolean;  // This instance is recording
+	isLocalRecording: boolean; // This instance is recording
 	isGlobalRecording: boolean; // Someone is recording
-	canRecord: boolean;         // This instance can start recording
+	canRecord: boolean; // This instance can start recording
 	durationDisplay: string;
 	randomsDisplay: string;
 	callbacks: RecordingUICallbacks;

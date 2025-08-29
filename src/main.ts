@@ -1,49 +1,46 @@
 import { Plugin } from "obsidian";
-import { RecordingModal } from "./views/RecordingModal.js";
-import { RecordingView, RECORDING_VIEW_TYPE } from "./views/RecordingView.js";
 import { GlobalRecordingState } from "./services/GlobalRecordingState.js";
+import { RecordingModal } from "./views/RecordingModal.js";
+import { RECORDING_VIEW_TYPE, RecordingView } from "./views/RecordingView.js";
 
 export default class ObsidianOperatorPlugin extends Plugin {
 	private globalState!: GlobalRecordingState;
 
 	async onload() {
 		console.log("Loading Obsidian Operator plugin");
-		
+
 		// Initialize global state
 		this.globalState = new GlobalRecordingState();
 
 		// Register the workspace view
-		this.registerView(
-			RECORDING_VIEW_TYPE,
-			(leaf) => new RecordingView(leaf, this.globalState)
-		);
+		this.registerView(RECORDING_VIEW_TYPE, (leaf) => new RecordingView(leaf, this.globalState));
 
 		// Add ribbon icon for modal
-		this.addRibbonIcon('microphone', 'Open Operator Modal', () => {
+		this.addRibbonIcon("microphone", "Open Operator Modal", () => {
 			new RecordingModal(this.app, this.globalState).open();
 		});
 
 		// Add ribbon icon for view
-		this.addRibbonIcon('sidebar-right', 'Open Operator View', () => {
+		this.addRibbonIcon("sidebar-right", "Open Operator View", () => {
 			this.activateView();
 		});
 
 		// Add command for modal
 		this.addCommand({
-			id: 'open-operator-modal',
-			name: 'Operator Modal',
+			id: "open-operator-modal",
+			name: "Operator Modal",
 			callback: () => {
 				new RecordingModal(this.app, this.globalState).open();
-			}
+			},
 		});
 
 		// Add command for view
 		this.addCommand({
-			id: 'open-operator-view',
-			name: 'Operator View',
+			id: "open-operator-view",
+			name: "Operator View",
 			callback: () => {
 				this.activateView();
-			}
+			},
 		});
 
 		// Note: Removed toggle-recording command as it doesn't make sense with
@@ -52,7 +49,7 @@ export default class ObsidianOperatorPlugin extends Plugin {
 
 	onunload() {
 		console.log("Unloading Obsidian Operator plugin");
-		
+
 		// Clean up global state
 		if (this.globalState) {
 			this.globalState.destroy();
@@ -66,7 +63,7 @@ export default class ObsidianOperatorPlugin extends Plugin {
 
 		if (!leaf) {
 			// Open as a normal tab in the main area
-			const newLeaf = workspace.getLeaf('tab');
+			const newLeaf = workspace.getLeaf("tab");
 			if (newLeaf) {
 				await newLeaf.setViewState({ type: RECORDING_VIEW_TYPE, active: true });
 				leaf = newLeaf;

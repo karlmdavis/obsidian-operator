@@ -1,10 +1,10 @@
-import { ItemView, WorkspaceLeaf } from 'obsidian';
-import { RecordingUI } from '../components/RecordingUI.js';
-import { GlobalRecordingState } from '../services/GlobalRecordingState.js';
-import { LocalRecordingState } from '../services/LocalRecordingState.js';
-import { RecordingUICallbacks } from '../types/index.js';
+import { ItemView, type WorkspaceLeaf } from "obsidian";
+import { RecordingUI } from "../components/RecordingUI.js";
+import type { GlobalRecordingState } from "../services/GlobalRecordingState.js";
+import { LocalRecordingState } from "../services/LocalRecordingState.js";
+import type { RecordingUICallbacks } from "../types/index.js";
 
-export const RECORDING_VIEW_TYPE = 'operator-recording-view';
+export const RECORDING_VIEW_TYPE = "operator-recording-view";
 
 export class RecordingView extends ItemView {
 	private recordingUI: RecordingUI | null = null;
@@ -27,26 +27,26 @@ export class RecordingView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return 'Operator';
+		return "Operator";
 	}
 
 	getIcon(): string {
-		return 'microphone';
+		return "microphone";
 	}
 
 	async onOpen(): Promise<void> {
 		const container = this.containerEl.children[1];
 		container.empty();
-		container.addClass('operator-view-container');
+		container.addClass("operator-view-container");
 
 		// Add title
-		container.createEl('h3', { 
-			text: 'Voice Recording',
-			cls: 'operator-view-title'
+		container.createEl("h3", {
+			text: "Voice Recording",
+			cls: "operator-view-title",
 		});
-		
-		const uiContainer = container.createEl('div', { 
-			cls: 'operator-view-ui' 
+
+		const uiContainer = container.createEl("div", {
+			cls: "operator-view-ui",
 		});
 
 		// Create callbacks for the UI
@@ -59,7 +59,7 @@ export class RecordingView extends ItemView {
 			onStop: () => {
 				this.localState.stopRecording();
 				this.globalState.stopRecording(this.localState.getId());
-			}
+			},
 		};
 
 		// Initialize UI with current state
@@ -68,14 +68,14 @@ export class RecordingView extends ItemView {
 				const localStateData = this.localState.getState();
 				const isGlobalRecording = this.globalState.isRecording();
 				const isLocalRecording = this.globalState.isRecordingInstance(this.localState.getId());
-				
+
 				this.recordingUI.updateProps({
 					isLocalRecording,
 					isGlobalRecording,
 					canRecord: !isGlobalRecording || isLocalRecording,
 					durationDisplay: localStateData.formattedDuration,
 					randomsDisplay: localStateData.formattedRandoms,
-					callbacks
+					callbacks,
 				});
 
 				// Update status
@@ -87,37 +87,37 @@ export class RecordingView extends ItemView {
 		const localStateData = this.localState.getState();
 		const isGlobalRecording = this.globalState.isRecording();
 		const isLocalRecording = this.globalState.isRecordingInstance(this.localState.getId());
-		
+
 		this.recordingUI = new RecordingUI(uiContainer, {
 			isLocalRecording,
 			isGlobalRecording,
 			canRecord: !isGlobalRecording,
 			durationDisplay: localStateData.formattedDuration,
 			randomsDisplay: localStateData.formattedRandoms,
-			callbacks
+			callbacks,
 		});
 
 		// Add status info
-		const statusEl = container.createEl('div', {
-			cls: 'operator-view-status'
+		const statusEl = container.createEl("div", {
+			cls: "operator-view-status",
 		});
 
 		// Update status based on current state
 		const updateStatus = () => {
 			const isLocalRec = this.globalState.isRecordingInstance(this.localState.getId());
 			const isGlobalRec = this.globalState.isRecording();
-			
+
 			if (isLocalRec) {
-				statusEl.setText('Recording in this view...');
-				statusEl.classList.add('recording');
-				statusEl.classList.remove('blocked');
+				statusEl.setText("Recording in this view...");
+				statusEl.classList.add("recording");
+				statusEl.classList.remove("blocked");
 			} else if (isGlobalRec) {
-				statusEl.setText('Another instance is recording');
-				statusEl.classList.add('blocked');
-				statusEl.classList.remove('recording');
+				statusEl.setText("Another instance is recording");
+				statusEl.classList.add("blocked");
+				statusEl.classList.remove("recording");
 			} else {
-				statusEl.setText('Ready to record');
-				statusEl.classList.remove('recording', 'blocked');
+				statusEl.setText("Ready to record");
+				statusEl.classList.remove("recording", "blocked");
 			}
 		};
 
@@ -140,7 +140,7 @@ export class RecordingView extends ItemView {
 			this.recordingUI.destroy();
 			this.recordingUI = null;
 		}
-		
+
 		if (this.unsubscribeGlobal) {
 			this.unsubscribeGlobal();
 			this.unsubscribeGlobal = null;

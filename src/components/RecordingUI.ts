@@ -1,4 +1,4 @@
-import { RecordingUIProps } from '../types/index.js';
+import type { RecordingUIProps } from "../types/index.js";
 
 export class RecordingUI {
 	private container: HTMLElement;
@@ -15,25 +15,25 @@ export class RecordingUI {
 
 	private render(): void {
 		this.container.empty();
-		this.container.addClass('operator-recording-ui');
+		this.container.addClass("operator-recording-ui");
 
 		// Create duration display
-		this.durationEl = this.container.createEl('div', {
-			cls: 'operator-duration',
-			text: this.props.durationDisplay
+		this.durationEl = this.container.createEl("div", {
+			cls: "operator-duration",
+			text: this.props.durationDisplay,
 		});
 
 		// Create main record button
-		this.button = this.container.createEl('button', {
-			cls: `operator-record-button ${this.props.isLocalRecording ? 'recording' : 'stopped'}`,
-			text: 'Record'
+		this.button = this.container.createEl("button", {
+			cls: `operator-record-button ${this.props.isLocalRecording ? "recording" : "stopped"}`,
+			text: "Record",
 		});
 
 		// Disable button if someone else is recording
 		this.button.disabled = !this.props.canRecord;
 		if (!this.props.canRecord && !this.props.isLocalRecording) {
-			this.button.classList.add('disabled');
-			this.button.title = 'Another instance is already recording';
+			this.button.classList.add("disabled");
+			this.button.title = "Another instance is already recording";
 		}
 
 		// Add click handler for record button
@@ -45,25 +45,26 @@ export class RecordingUI {
 
 		// Create stop button (only visible when THIS instance is recording)
 		if (this.props.isLocalRecording) {
-			const stopButton = this.container.createEl('button', {
-				cls: 'operator-stop-button',
-				text: 'Stop'
+			const stopButton = this.container.createEl("button", {
+				cls: "operator-stop-button",
+				text: "Stop",
 			});
-			
+
 			stopButton.onclick = () => {
 				this.props.callbacks.onStop();
 			};
 		}
 
 		// Create random numbers display
-		this.randomsEl = this.container.createEl('div', {
-			cls: 'operator-randoms',
-			text: this.props.randomsDisplay
+		this.randomsEl = this.container.createEl("div", {
+			cls: "operator-randoms",
+			text: this.props.randomsDisplay,
 		});
 
 		// Add accessible labels
-		this.button.setAttribute('aria-label', 
-			this.props.isLocalRecording ? 'Recording in progress' : 'Start recording'
+		this.button.setAttribute(
+			"aria-label",
+			this.props.isLocalRecording ? "Recording in progress" : "Start recording",
 		);
 	}
 

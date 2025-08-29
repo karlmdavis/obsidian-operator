@@ -1,5 +1,5 @@
 // Sample test to verify test setup works
-import { test, expect } from "bun:test";
+import { expect, test } from "bun:test";
 
 test("sample test", () => {
 	expect(1 + 1).toBe(2);

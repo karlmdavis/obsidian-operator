@@ -12,7 +12,7 @@ export class GlobalRecordingState {
 		if (this.recordingInstanceId !== null) {
 			return false; // Someone else is already recording
 		}
-		
+
 		this.recordingInstanceId = instanceId;
 		this.notifyListeners();
 		return true;
@@ -51,9 +51,9 @@ export class GlobalRecordingState {
 	}
 
 	private notifyListeners(): void {
-		this.listeners.forEach(listener => 
-			listener(this.recordingInstanceId !== null, this.recordingInstanceId)
-		);
+		for (const listener of this.listeners) {
+			listener(this.recordingInstanceId !== null, this.recordingInstanceId);
+		}
 	}
 
 	destroy(): void {
