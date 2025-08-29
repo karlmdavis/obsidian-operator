@@ -6,7 +6,7 @@ import { RECORDING_VIEW_TYPE, RecordingView } from "./views/RecordingView.js";
 /**
  * Main plugin class for Obsidian Operator - a voice-driven transcription plugin
  * designed for hands-free operation while commuting or when touch input is impractical.
- * 
+ *
  * Architecture Overview:
  * - Uses a dual-state management system: GlobalRecordingState prevents concurrent recordings
  *   across multiple views, while LocalRecordingState manages individual view state
@@ -18,7 +18,7 @@ export default class ObsidianOperatorPlugin extends Plugin {
 	 * Global recording state manager - prevents multiple simultaneous recordings
 	 * across different views/modals. This is the "single source of truth" for
 	 * whether any recording is currently active in the entire plugin.
-	 * 
+	 *
 	 * Using definite assignment assertion (!) because Obsidian guarantees onload()
 	 * will be called before any other plugin methods.
 	 */
@@ -27,7 +27,7 @@ export default class ObsidianOperatorPlugin extends Plugin {
 	/**
 	 * Plugin initialization - called by Obsidian when plugin is enabled.
 	 * Sets up the dual-UI architecture: modal for quick captures, view for extended sessions.
-	 * 
+	 *
 	 * The plugin registers both UI modes with Obsidian's workspace system, allowing users
 	 * to access voice functionality through ribbon icons, commands, or keyboard shortcuts.
 	 */
@@ -64,7 +64,7 @@ export default class ObsidianOperatorPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "open-operator-view", 
+			id: "open-operator-view",
 			name: "Operator View",
 			callback: () => {
 				this.activateView();
@@ -79,7 +79,7 @@ export default class ObsidianOperatorPlugin extends Plugin {
 	/**
 	 * Plugin cleanup - called by Obsidian when plugin is disabled or reloaded.
 	 * Essential for preventing memory leaks and ensuring clean state transitions.
-	 * 
+	 *
 	 * The plugin must clean up its global state to prevent orphaned listeners
 	 * and ensure proper cleanup of any ongoing recordings.
 	 */
@@ -95,11 +95,11 @@ export default class ObsidianOperatorPlugin extends Plugin {
 
 	/**
 	 * Activates the Recording View in the workspace, creating it if it doesn't exist.
-	 * 
+	 *
 	 * Obsidian's workspace system allows multiple "leaves" (tabs/panes) of the same view type.
 	 * We first check if a Recording View already exists, and if so, bring it to focus.
 	 * If not, we create a new tab in the main workspace area.
-	 * 
+	 *
 	 * This pattern follows Obsidian's best practices for view management and ensures
 	 * users don't accidentally create multiple instances when they just want to access
 	 * an existing view.

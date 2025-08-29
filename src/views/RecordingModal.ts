@@ -3,6 +3,7 @@ import { RecordingUI } from "../components/RecordingUI.js";
 import type { GlobalRecordingState } from "../services/GlobalRecordingState.js";
 import { LocalRecordingState } from "../services/LocalRecordingState.js";
 import type { RecordingUICallbacks } from "../types/index.js";
+import { generateInstanceId } from "../utils/instance-id.js";
 
 export class RecordingModal extends Modal {
 	private recordingUI: RecordingUI | null = null;
@@ -14,8 +15,8 @@ export class RecordingModal extends Modal {
 	constructor(app: App, globalState: GlobalRecordingState) {
 		super(app);
 		this.globalState = globalState;
-		// Create unique instance ID for this modal
-		this.localState = new LocalRecordingState(`modal-${Date.now()}`);
+		// Create unique instance ID for this modal using type-safe generation
+		this.localState = new LocalRecordingState(generateInstanceId("modal"));
 	}
 
 	onOpen(): void {

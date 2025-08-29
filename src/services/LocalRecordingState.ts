@@ -1,16 +1,23 @@
+import type { UnsubscribeFunction, EventListener } from "../types/index.js";
+
 /**
  * Local recording state manager for individual UI components (modal, view instances).
- * 
+ *
  * While GlobalRecordingState coordinates between components to prevent conflicts,
  * LocalRecordingState manages the detailed recording state for each UI instance:
  * - Timer management (elapsed time tracking)
  * - Recording data collection (currently mock data with random numbers)
  * - Component-specific UI state updates
- * 
+ *
  * In Phase 2, this will be extended to handle actual audio recording, transcription
  * results, and voice command processing. The current implementation serves as a
  * foundation demonstrating the state management patterns.
  */
+
+/**
+ * Type definition for local recording state change listeners.
+ */
+export type LocalStateListener = EventListener<LocalStateUpdate>;
 export class LocalRecordingState {
 	/**
 	 * Unique identifier for this recording instance, used to coordinate with GlobalRecordingState.
@@ -48,7 +55,7 @@ export class LocalRecordingState {
 	 * Observers that get notified when this component's recording state changes.
 	 * Separate from global listeners - these are specific to this UI component.
 	 */
-	private listeners = new Set<(state: LocalStateUpdate) => void>();
+	private listeners = new Set<LocalStateListener>();
 
 	constructor(instanceId: string) {
 		this.instanceId = instanceId;
@@ -64,12 +71,12 @@ export class LocalRecordingState {
 
 	/**
 	 * Starts local recording timer and data collection.
-	 * 
+	 *
 	 * Note: This only manages the LOCAL state. The caller must first check with
 	 * GlobalRecordingState.tryStartRecording() to ensure recording is allowed.
 	 * This separation allows for clean error handling - if global state rejects
 	 * the recording attempt, we never start the local timer.
-	 * 
+	 *
 	 * Phase 2 Extension: This method will initialize audio capture and transcription services.
 	 */
 	startRecording(): void {
@@ -93,11 +100,11 @@ export class LocalRecordingState {
 
 	/**
 	 * Stops local recording and cleans up resources.
-	 * 
+	 *
 	 * Resets all recording state and stops timers. Like startRecording(), this only
 	 * handles LOCAL cleanup. The caller should also notify GlobalRecordingState
 	 * to release the recording lock.
-	 * 
+	 *
 	 * Phase 2 Extension: Will handle stopping audio capture, finalizing transcription,
 	 * and saving results to files.
 	 */
@@ -117,7 +124,7 @@ export class LocalRecordingState {
 
 	/**
 	 * Returns current state snapshot for UI components.
-	 * 
+	 *
 	 * Creates a new object with both raw data and formatted versions for display.
 	 * Array is cloned to prevent external modifications to internal state.
 	 * This method is called frequently by UI components, so it's designed to be lightweight.
@@ -135,11 +142,11 @@ export class LocalRecordingState {
 	/**
 	 * Subscribe to state changes for this specific recording instance.
 	 * UI components use this to update their displays when recording state changes.
-	 * 
+	 *
 	 * @param listener Function called with new state data when changes occur
 	 * @returns Cleanup function to remove the listener and prevent memory leaks
 	 */
-	subscribe(listener: (state: LocalStateUpdate) => void): () => void {
+	subscribe(listener: LocalStateListener): UnsubscribeFunction {
 		this.listeners.add(listener);
 		return () => this.listeners.delete(listener);
 	}
@@ -187,18 +194,18 @@ export class LocalRecordingState {
 
 /**
  * State update interface passed to LocalRecordingState subscribers.
- * 
+ *
  * Contains both raw data (for processing) and formatted strings (for UI display).
  * This pattern reduces the need for UI components to implement their own formatting logic
  * and ensures consistent presentation across different UI components.
- * 
+ *
  * Phase 2 Extensions: Will include transcription text, confidence scores,
  * recognized commands, audio file paths, etc.
  */
 export interface LocalStateUpdate {
-	isRecording: boolean;           // Current recording status
-	elapsedSeconds: number;         // Raw timer value
-	randomNumbers: number[];        // Mock data - will become transcription/audio data  
-	formattedDuration: string;      // Human-readable timer display (MM:SS)
-	formattedRandoms: string;       // Formatted data for UI display
+	isRecording: boolean; // Current recording status
+	elapsedSeconds: number; // Raw timer value
+	randomNumbers: number[]; // Mock data - will become transcription/audio data
+	formattedDuration: string; // Human-readable timer display (MM:SS)
+	formattedRandoms: string; // Formatted data for UI display
 }

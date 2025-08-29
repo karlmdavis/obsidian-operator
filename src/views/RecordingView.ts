@@ -3,6 +3,7 @@ import { RecordingUI } from "../components/RecordingUI.js";
 import type { GlobalRecordingState } from "../services/GlobalRecordingState.js";
 import { LocalRecordingState } from "../services/LocalRecordingState.js";
 import type { RecordingUICallbacks } from "../types/index.js";
+import { generateInstanceId } from "../utils/instance-id.js";
 
 export const RECORDING_VIEW_TYPE = "operator-recording-view";
 
@@ -12,14 +13,11 @@ export class RecordingView extends ItemView {
 	private localState: LocalRecordingState;
 	private unsubscribeGlobal: (() => void) | null = null;
 	private unsubscribeLocal: (() => void) | null = null;
-	private static instanceCounter = 0;
-
 	constructor(leaf: WorkspaceLeaf, globalState: GlobalRecordingState) {
 		super(leaf);
 		this.globalState = globalState;
-		// Create unique instance ID for this view
-		RecordingView.instanceCounter++;
-		this.localState = new LocalRecordingState(`view-${RecordingView.instanceCounter}-${Date.now()}`);
+		// Create unique instance ID for this view using type-safe generation
+		this.localState = new LocalRecordingState(generateInstanceId("view"));
 	}
 
 	getViewType(): string {

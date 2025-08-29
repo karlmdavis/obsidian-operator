@@ -2,11 +2,11 @@ import type { RecordingUIProps } from "../types/index.js";
 
 /**
  * Reusable UI component for recording controls and status display.
- * 
+ *
  * This component follows the "controlled component" pattern - it receives all state
  * via props and communicates back through callbacks, making it completely stateless
  * and reusable across different contexts (modal, view, future components).
- * 
+ *
  * Design Principles:
  * - Accessibility-first: proper ARIA labels and semantic HTML
  * - Mobile-optimized: large touch targets for hands-free usage scenarios
@@ -16,22 +16,22 @@ import type { RecordingUIProps } from "../types/index.js";
 export class RecordingUI {
 	/** DOM container where the UI is rendered - provided by parent component */
 	private container: HTMLElement;
-	
+
 	/** Main record button reference - using definite assignment since render() creates it */
 	private button!: HTMLButtonElement;
-	
+
 	/** Duration display element reference */
 	private durationEl!: HTMLElement;
-	
+
 	/** Random numbers (future: transcription) display element reference */
 	private randomsEl!: HTMLElement;
-	
+
 	/** Current props determining UI state and behavior */
 	private props: RecordingUIProps;
 
 	/**
 	 * Creates a new RecordingUI instance in the provided container.
-	 * 
+	 *
 	 * @param container HTML element where the UI will be rendered (modal, view panel, etc.)
 	 * @param props Initial state and configuration for the UI
 	 */
@@ -43,7 +43,7 @@ export class RecordingUI {
 
 	/**
 	 * Renders the complete UI based on current props.
-	 * 
+	 *
 	 * This method is called on initial creation and whenever props change.
 	 * It fully recreates the DOM to ensure UI is always in sync with state.
 	 * While this could be optimized with selective updates, full re-render
@@ -106,7 +106,7 @@ export class RecordingUI {
 
 	/**
 	 * Updates the UI with new props and re-renders.
-	 * 
+	 *
 	 * Called by parent components when recording state changes to keep UI in sync.
 	 * The full re-render approach ensures consistency but could be optimized
 	 * for performance in Phase 2 if needed.
