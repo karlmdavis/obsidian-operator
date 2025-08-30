@@ -82,12 +82,26 @@ bun run build      # Production build
 bun test           # Run all tests
 bun test:watch     # Run tests in watch mode
 
-# Code Quality
+# Code Quality (Individual)
 bun run lint       # Check for linting issues and formatting
 bun run format     # Auto-format code
 bun run lint:fix   # Fix auto-fixable linting issues and formatting
 bun run typecheck  # TypeScript type checking
+
+# Code Quality (CI Tasks - Recommended)
+bun run ci:quality # Run all quality checks (lint + typecheck + coverage)
+bun run ci:coverage # Run coverage analysis only
+bun run ci:test    # Run tests only
 ```
+
+#### Quality Verification
+
+**Before submitting PRs, always run:**
+```bash
+bun run ci:quality
+```
+
+This single command runs all quality checks that CI will perform: linting, type checking, testing, and coverage analysis.
 
 ### Testing
 
@@ -107,6 +121,41 @@ bun test                    # Run all tests
 bun test path/to/file       # Run specific test file
 bun test --watch            # Watch mode
 ```
+
+### Code Coverage
+
+This project maintains **80% minimum coverage** with automated analysis integrated into the CI/CD pipeline.
+
+#### Coverage Commands
+
+```bash
+# Basic coverage
+bun run test:coverage              # Generate coverage report  
+bun run ci:coverage               # Coverage with CI validation (recommended)
+
+# Coverage reports
+bun run test:coverage:text        # Generate text coverage report
+bun run coverage:summary          # Coverage summary (same as above)
+bun run test:coverage:check       # Check coverage thresholds
+```
+
+#### Coverage Standards
+
+| Metric | Minimum | Target |
+|--------|---------|--------|
+| Lines | 80% | 85% |
+| Functions | 80% | 85% |
+| Branches | 75% | 80% |
+| Statements | 80% | 85% |
+
+#### Coverage Guidelines
+
+- **New Code**: Aim for 90%+ coverage on new features
+- **Bug Fixes**: Include tests that reproduce the bug
+- **Critical Paths**: Ensure 100% coverage for core functionality  
+- **Review**: Use text reports (`bun run coverage:summary`) to identify gaps
+
+Coverage is automatically collected in GitHub Actions and reported on pull requests.
 
 ## Contribution Guidelines
 

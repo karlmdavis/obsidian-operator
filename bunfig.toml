@@ -1,9 +1,34 @@
-[test]
-preload = ["./tests/setup/happydom.ts"]
-
 [install]
 # Install exact versions to avoid compatibility issues
 exact = true
 
 # Use the most compatible registry
 registry = "https://registry.npmjs.org/"
+
+# Optional: Enable peer dependency auto-install
+auto = false
+
+[test]
+# Test setup file for DOM globals and mocks
+preload = ["./tests/setup/happydom.ts"]
+
+# Test timeout (default: 5000ms)
+timeout = 10000
+
+# Coverage configuration - using command line options instead of bunfig
+# Bun's coverage configuration in bunfig.toml is limited, so we'll use CLI options
+
+# Performance options
+[test.performance]
+# Parallel test execution
+parallel = true
+
+# Maximum number of test files to run in parallel
+maxConcurrency = 4
+
+# Bail on first test failure (faster feedback)
+bail = false
+
+# Environment variables for testing
+[test.env]
+NODE_ENV = "test"

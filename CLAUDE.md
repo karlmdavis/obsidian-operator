@@ -72,11 +72,15 @@ bun run dev        # Development mode with watch and hot reload (runs continuous
 bun test           # Run all tests
 bun test:watch     # Run tests in watch mode
 
-# Code Quality
+# Code Quality (Individual)
 bun run lint       # Check for linting issues
 bun run format     # Auto-format code
 bun run lint:fix   # Fix auto-fixable linting issues
 bun run typecheck  # TypeScript type checking
+
+# Code Quality (CI Tasks - Recommended for verification)
+bun run ci:quality # Run all quality checks (lint + typecheck + coverage)
+bun run ci:coverage # Run coverage analysis only
 ```
 
 ### Code Quality Standards
@@ -88,7 +92,9 @@ bun run typecheck  # TypeScript type checking
   - Type assertions in specific testing scenarios
 - Always provide clear, descriptive reasons for any lint suppressions
 
-**Important**: When testing builds, use `bun run build` (not `bun run dev`) as it completes and exits. The `dev` command runs indefinitely in watch mode.
+**Important**: 
+- When testing builds, use `bun run build` (not `bun run dev`) as it completes and exits. The `dev` command runs indefinitely in watch mode.
+- When verifying code quality, use `bun run ci:quality` to run the same checks as CI/CD.
 
 ## Known Constraints
 

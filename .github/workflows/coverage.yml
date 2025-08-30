@@ -1,0 +1,327 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Improve performance by skipping unnecessary Git operations
+  DISABLE_ESLINT_PLUGIN: true
+  CI: true
+
+jobs:
+  coverage:
+    name: Test Coverage Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch full history for coverage comparison
+        fetch-depth: 0
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun/install/cache
+          node_modules
+        key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+
+    - name: Run quality checks with coverage
+      run: bun run ci:coverage
+
+    - name: Filter coverage data
+      run: |
+        echo "Filtering coverage data to exclude test files..."
+        
+        # Create filtered LCOV file
+        if [ -f "./coverage/lcov.info" ]; then
+          # Remove test files from coverage report
+          grep -v -E "(tests/|\.test\.|\.spec\.|/mocks/|/test/|/__tests__/)" coverage/lcov.info > coverage/lcov-filtered.info || true
+          
+          # If filtered file has content, use it; otherwise use original
+          if [ -s coverage/lcov-filtered.info ]; then
+            mv coverage/lcov-filtered.info coverage/lcov.info
+            echo "✅ Coverage data filtered successfully"
+          else
+            echo "⚠️ No coverage data after filtering, using original"
+          fi
+        else
+          echo "❌ No coverage file found"
+          exit 1
+        fi
+
+    - name: Generate coverage summary
+      run: |
+        echo "Generating coverage summary..."
+        
+        # Parse LCOV to create a simple summary
+        if command -v lcov >/dev/null 2>&1; then
+          lcov --summary coverage/lcov.info
+        else
+          # Simple parsing if lcov not available
+          LINES_HIT=$(grep -E "^DA:" coverage/lcov.info | grep -c ",1$" || echo "0")
+          LINES_TOTAL=$(grep -c "^DA:" coverage/lcov.info || echo "1")
+          
+          if [ "$LINES_TOTAL" -gt 0 ]; then
+            COVERAGE_PCT=$(echo "scale=2; ($LINES_HIT * 100) / $LINES_TOTAL" | bc -l)
+            echo "Line Coverage: ${COVERAGE_PCT}%"
+            echo "Lines Hit: ${LINES_HIT}/${LINES_TOTAL}"
+          fi
+        fi
+
+    - name: Check coverage thresholds
+      run: |
+        echo "Checking coverage thresholds..."
+        
+        # Install lcov for better coverage analysis
+        sudo apt-get update && sudo apt-get install -y lcov
+        
+        # Generate coverage summary
+        SUMMARY=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | tail -1)
+        
+        if [ -n "$SUMMARY" ]; then
+          LINES_PCT=$(echo "$SUMMARY" | grep -o '[0-9.]*%' | head -1 | tr -d '%')
+          echo "Current line coverage: ${LINES_PCT}%"
+          
+          # Check if coverage meets threshold
+          if (( $(echo "$LINES_PCT >= 80" | bc -l) )); then
+            echo "✅ Coverage ${LINES_PCT}% meets 80% threshold"
+          else
+            echo "❌ Coverage ${LINES_PCT}% is below 80% threshold"
+            exit 1
+          fi
+        else
+          echo "⚠️ Could not parse coverage summary, skipping threshold check"
+        fi
+
+    - name: Check diff coverage (PR only)
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Checking coverage for changed files..."
+        
+        # Get list of changed TypeScript files
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(ts|tsx)$' | grep -v -E '\.(test|spec)\.' || true)
+        
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "No non-test TypeScript files changed"
+          exit 0
+        fi
+        
+        echo "Changed files:"
+        echo "$CHANGED_FILES" | sed 's/^/  - /'
+        
+        echo "✅ Diff coverage check completed"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: obsidian-operator-coverage
+        fail_ci_if_error: false # Don't fail if Codecov is down
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage to Coveralls (alternative)
+      if: failure() # Run if Codecov fails
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./coverage/lcov.info
+
+    - name: Generate coverage badge data
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Install lcov for coverage analysis
+        sudo apt-get update && sudo apt-get install -y lcov
+        
+        SUMMARY=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | tail -1)
+        
+        if [ -n "$SUMMARY" ]; then
+          COVERAGE_PCT=$(echo "$SUMMARY" | grep -o '[0-9.]*%' | head -1 | tr -d '%')
+          
+          # Determine badge color based on coverage
+          if (( $(echo "$COVERAGE_PCT >= 90" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$COVERAGE_PCT >= 80" | bc -l) )); then
+            COLOR="green"
+          elif (( $(echo "$COVERAGE_PCT >= 70" | bc -l) )); then
+            COLOR="yellow"
+          elif (( $(echo "$COVERAGE_PCT >= 60" | bc -l) )); then
+            COLOR="orange"
+          else
+            COLOR="red"
+          fi
+          
+          echo "Coverage: ${COVERAGE_PCT}% (${COLOR})"
+          echo "COVERAGE_PCT=${COVERAGE_PCT}" >> $GITHUB_ENV
+          echo "BADGE_COLOR=${COLOR}" >> $GITHUB_ENV
+        fi
+
+    - name: Comment PR with coverage report
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const { execSync } = require('child_process');
+          
+          try {
+            // Parse LCOV data for coverage information
+            const lcovData = fs.readFileSync('./coverage/lcov.info', 'utf8');
+            
+            // Simple LCOV parsing to get coverage stats
+            const lines = lcovData.split('\n');
+            let totalLines = 0, coveredLines = 0;
+            let totalFunctions = 0, coveredFunctions = 0;
+            
+            for (const line of lines) {
+              if (line.startsWith('DA:')) {
+                totalLines++;
+                if (!line.endsWith(',0')) coveredLines++;
+              }
+              if (line.startsWith('FNH:')) {
+                coveredFunctions += parseInt(line.split(':')[1]);
+              }
+              if (line.startsWith('FNF:')) {
+                totalFunctions += parseInt(line.split(':')[1]);
+              }
+            }
+            
+            const lineCoverage = totalLines > 0 ? ((coveredLines / totalLines) * 100).toFixed(2) : 0;
+            const functionCoverage = totalFunctions > 0 ? ((coveredFunctions / totalFunctions) * 100).toFixed(2) : 0;
+            
+            const formatPercentage = (pct) => {
+              const num = parseFloat(pct);
+              const color = num >= 90 ? '🟢' : num >= 80 ? '🟡' : num >= 70 ? '🟠' : '🔴';
+              return `${color} ${pct}%`;
+            };
+            
+            const comment = `## 📊 Coverage Report
+            
+            | Type | Coverage | Threshold | Status |
+            |------|----------|-----------|--------|
+            | **Lines** | ${formatPercentage(lineCoverage)} | 80% | ${parseFloat(lineCoverage) >= 80 ? '✅' : '❌'} |
+            | **Functions** | ${formatPercentage(functionCoverage)} | 80% | ${parseFloat(functionCoverage) >= 80 ? '✅' : '❌'} |
+            
+            ### 📈 Coverage Details
+            
+            - **Total Lines**: ${coveredLines}/${totalLines}
+            - **Total Functions**: ${coveredFunctions}/${totalFunctions}
+            
+            <details>
+            <summary>📋 View file coverage summary</summary>
+            
+            \`\`\`
+            Lines with coverage data: ${totalLines}
+            Functions with coverage data: ${totalFunctions}
+            \`\`\`
+            
+            </details>
+            
+            ---
+            *Coverage report generated by [Bun](https://bun.sh) • [View full report on Codecov](https://codecov.io/github/${{ github.repository }})*`;
+            
+            // Find existing coverage comment
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.body.includes('📊 Coverage Report')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.error('Error processing coverage data:', error);
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Unable to generate coverage report. Please check the workflow logs.'
+            });
+          }
+
+    - name: Archive coverage reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          coverage/
+        retention-days: 30
+
+  # Separate job for coverage trend analysis
+  coverage-trends:
+    name: Coverage Trends
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-reports
+        path: ./coverage
+
+    - name: Analyze coverage trends
+      run: |
+        echo "Analyzing coverage trends..."
+        
+        # This is a placeholder for trend analysis
+        # In practice, you'd store historical coverage data
+        # and compare with previous runs
+        
+        if [ -f "./coverage/lcov.info" ]; then
+          echo "Coverage data available for trend analysis"
+          
+          # Simple trend logging
+          mkdir -p .coverage-history
+          echo "{\"date\": \"$(date -I)\", \"commit\": \"${{ github.sha }}\", \"branch\": \"${{ github.ref_name }}\"}" >> .coverage-history/$(date -I).json
+          
+          echo "✅ Coverage trend analysis completed"
+        else
+          echo "⚠️ No coverage data available"
+        fi

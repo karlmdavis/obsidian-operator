@@ -1,5 +1,9 @@
 # Obsidian Operator
 
+[![CI](https://github.com/USER/obsidian-operator/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/obsidian-operator/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/USER/obsidian-operator/branch/main/graph/badge.svg)](https://codecov.io/gh/USER/obsidian-operator)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 **Obsidian Operator** is an experimental plugin for [Obsidian](https://obsidian.md/).
 It is designed to solve a neglected niche: safe, hands-free capture of thoughts while commuting or otherwise unable to
   use touch interactions.
@@ -63,7 +67,7 @@ This project has completed **Phase 1: Hello World Plugin** with a functional fou
 - ✅ **Working Obsidian Plugin**: Installable plugin with dual UI interfaces (modal + view)
 - ✅ **State Management Architecture**: Dual-state coordination system preventing recording conflicts
 - ✅ **UI Components**: Reusable recording controls with accessibility features
-- ✅ **Testing Infrastructure**: Comprehensive unit and integration tests (56 tests, 257 assertions)
+- ✅ **Testing Infrastructure**: Comprehensive unit and integration test suite with automated coverage analysis
 - ✅ **Build System**: Bun-based development workflow with hot reload support
 - ✅ **CI/CD Pipeline**: GitHub Actions with automated testing and linting
 
@@ -83,3 +87,16 @@ The plugin is ready for **Phase 2: Core Voice Interface** implementation, includ
 
 See the [`dev/roadmap/`](./dev/roadmap/) directory for detailed milestones and planned phases.
 See [`dev/architecture.md`](./dev/architecture.md) for design considerations.
+
+## Development/Contributing
+
+This project maintains high code quality standards with comprehensive testing, automated coverage analysis, and strict linting enforcement.
+
+**Quick Start**:
+```bash
+bun install          # Install dependencies  
+bun run dev          # Development build with watch mode
+bun run ci:quality   # Run all quality checks (lint, typecheck, coverage)
+```
+
+**Full development setup, coding standards, and contribution guidelines**: See [CONTRIBUTING.md](./CONTRIBUTING.md)

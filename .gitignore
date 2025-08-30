@@ -21,9 +21,11 @@ main.js
 
 # Testing
 coverage/
+coverage-html/
 .nyc_output/
 test-results/
 *.lcov
+.coverage-history/
 
 # Environment variables
 .env
