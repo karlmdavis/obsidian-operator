@@ -1,5 +1,6 @@
 name: CI
 
+# Optimized with caching and concurrency controls for better performance
 on:
   push:
     branches: [main]
