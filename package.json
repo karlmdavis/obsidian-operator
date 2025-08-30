@@ -11,9 +11,15 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "lint:fix": "biome check --apply .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
   },
-  "keywords": ["obsidian", "plugin", "voice", "transcription"],
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "voice",
+    "transcription"
+  ],
   "author": "Karl M Davis",
   "license": "AGPL-3.0",
   "devDependencies": {
@@ -23,6 +29,7 @@
     "@types/node": "^22.15.3",
     "builtin-modules": "^5.0.0",
     "esbuild": "^0.25.0",
+    "husky": "9.1.7",
     "obsidian": "latest",
     "typescript": "^5.8.3"
   },
