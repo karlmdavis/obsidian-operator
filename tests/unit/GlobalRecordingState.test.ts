@@ -66,7 +66,7 @@ test("GlobalRecordingState - subscription", () => {
 	state.tryStartRecording("instance-1");
 	expect(notificationCount).toBe(1);
 	expect(lastIsRecording).toBe(true);
-	expect(lastInstanceId).toBe("instance-1");
+	expect(lastInstanceId!).toBe("instance-1");
 	expect(lastState).toBe("recording");
 
 	// Stop recording
