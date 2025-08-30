@@ -83,9 +83,9 @@ bun test           # Run all tests
 bun test:watch     # Run tests in watch mode
 
 # Code Quality
-bun run lint       # Check for linting issues
+bun run lint       # Check for linting issues and formatting
 bun run format     # Auto-format code
-bun run lint:fix   # Fix auto-fixable linting issues
+bun run lint:fix   # Fix auto-fixable linting issues and formatting
 bun run typecheck  # TypeScript type checking
 ```
 
@@ -122,7 +122,15 @@ bun test --watch            # Watch mode
       so the second part is indented.
     ```
     
-- Code and configuration should use the repository's provided linters and formatters.
+- **Code formatting is enforced** using Biome with the following settings:
+  - **Indentation**: Tabs (width: 2)
+  - **Line width**: 110 characters
+  - **Quotes**: Double quotes for strings
+  - **Semicolons**: Always required
+  - **Import organization**: Automatic
+
+- **Before committing**: Always run `bun run format` or `bun run lint:fix` to auto-format your code
+- **CI enforcement**: All code must pass `bun run lint` which includes formatting checks
 
 ### Linting Policy
 

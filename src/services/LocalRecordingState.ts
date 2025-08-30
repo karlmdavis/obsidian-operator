@@ -1,4 +1,4 @@
-import type { UnsubscribeFunction, EventListener } from "../types/index.js";
+import type { EventListener, UnsubscribeFunction } from "../types/index.js";
 
 /**
  * Local recording state manager for individual UI components (modal, view instances).

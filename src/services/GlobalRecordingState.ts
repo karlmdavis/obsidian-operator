@@ -1,4 +1,4 @@
-import type { UnsubscribeFunction, EventListener, RecordingState } from "../types/index.js";
+import type { EventListener, RecordingState, UnsubscribeFunction } from "../types/index.js";
 
 /**
  * Global recording state coordinator that prevents concurrent recordings across the plugin.

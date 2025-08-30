@@ -53,7 +53,7 @@ test("GlobalRecordingState - subscription", () => {
 	let notificationCount = 0;
 	let lastIsRecording = false;
 	let lastInstanceId: string | null = null;
-	let lastState: string = "idle";
+	let lastState = "idle";
 
 	const unsubscribe = state.subscribe((stateInfo) => {
 		notificationCount++;
