@@ -19,6 +19,9 @@ const { MockApp, MockPlugin, MockWorkspaceLeaf } = require("../mocks/obsidian.js
 const { GlobalRecordingState } = require("../../src/services/GlobalRecordingState.js");
 const { LocalRecordingState } = require("../../src/services/LocalRecordingState.js");
 
+// Reserved for future workspace integration tests
+void MockWorkspaceLeaf;
+
 // Test fixtures
 // biome-ignore lint: Mock objects require any type for flexible test data
 let mockApp: any;

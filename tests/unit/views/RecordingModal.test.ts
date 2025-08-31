@@ -17,6 +17,9 @@ const { MockApp, MockModal, MockScope } = require("../../mocks/obsidian.js");
 const { GlobalRecordingState } = require("../../../src/services/GlobalRecordingState.js");
 const { LocalRecordingState } = require("../../../src/services/LocalRecordingState.js");
 
+// Reserved for future modal scope management tests
+void MockScope;
+
 // Test fixtures
 // biome-ignore lint: Mock objects require any type for flexible test data
 let mockApp: any;
@@ -199,6 +202,10 @@ test("Modal pattern: cleanup and resource management", () => {
 	const modalLocalState = new LocalRecordingState("modal-cleanup-test");
 	const globalListenerRemoved = false;
 	const localListenerRemoved = false;
+
+	// Reserved for future listener cleanup verification
+	void globalListenerRemoved;
+	void localListenerRemoved;
 
 	// Start recording to create resources that need cleanup
 	globalState.tryStartRecording(modalLocalState.getId());
