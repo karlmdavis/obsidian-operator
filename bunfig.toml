@@ -15,8 +15,18 @@ preload = ["./tests/setup/happydom.ts"]
 # Test timeout (default: 5000ms)
 timeout = 10000
 
-# Coverage configuration - using command line options instead of bunfig
-# Bun's coverage configuration in bunfig.toml is limited, so we'll use CLI options
+# Coverage configuration
+coverage = true
+coverageSkipTestFiles = true
+coverageThreshold = { line = 80 }
+
+# Exclude test files and mocks from coverage reports
+coveragePathIgnorePatterns = [
+  "tests/**/*",
+  "**/*.test.ts",
+  "**/*.spec.ts",
+  "**/mocks/**"
+]
 
 # Performance options
 [test.performance]
