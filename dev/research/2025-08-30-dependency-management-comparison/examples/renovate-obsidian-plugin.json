@@ -1,0 +1,115 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate configuration optimized for Obsidian TypeScript plugin with Bun",
+  "extends": [
+    "config:js-lib",
+    ":dependencyDashboard",
+    ":semanticPrefixFixDepsChoreOthers",
+    ":ignoreModulesAndTests",
+    "group:monorepos",
+    "helpers:disableTypesNodeMajor"
+  ],
+  "schedule": ["after 9pm", "before 9am"],
+  "timezone": "America/Los_Angeles",
+  "packageRules": [
+    {
+      "description": "Obsidian core API and types - weekly updates on Monday",
+      "groupName": "obsidian core",
+      "matchPackagePatterns": ["^obsidian$", "^@types/obsidian"],
+      "schedule": ["on monday"],
+      "reviewers": ["maintainer-team"]
+    },
+    {
+      "description": "Voice processing and AI dependencies - careful review required",
+      "groupName": "voice processing dependencies",
+      "matchPackagePatterns": [
+        "openai",
+        "anthropic", 
+        "@anthropic-ai/*",
+        "speech",
+        "audio",
+        "whisper",
+        "voice"
+      ],
+      "reviewers": ["voice-experts"],
+      "schedule": ["on saturday"]
+    },
+    {
+      "description": "Build and development tooling - can be auto-merged for patches",
+      "groupName": "build tooling",
+      "matchPackagePatterns": [
+        "^@types/",
+        "typescript",
+        "bun-types",
+        "biome",
+        "@biomejs/*",
+        "vitest",
+        "@vitest/*"
+      ],
+      "automerge": true,
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "schedule": ["before 6am on weekdays"]
+    },
+    {
+      "description": "Testing framework updates - grouped for easier review",
+      "groupName": "testing frameworks",
+      "matchPackagePatterns": [
+        "vitest",
+        "@vitest/*",
+        "@testing-library/*",
+        "happy-dom",
+        "jsdom"
+      ],
+      "schedule": ["on friday"]
+    },
+    {
+      "description": "GitHub Actions - monthly updates to avoid CI churn",
+      "groupName": "github actions", 
+      "matchManagers": ["github-actions"],
+      "schedule": ["on the first day of the month"],
+      "automerge": true,
+      "matchUpdateTypes": ["patch", "pin", "digest"]
+    },
+    {
+      "description": "Security updates - highest priority, immediate processing",
+      "matchDepTypes": ["dependencies"],
+      "vulnerabilityAlerts": {
+        "enabled": true
+      },
+      "prPriority": 10,
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Major version updates - manual review required",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "reviewers": ["maintainer-team"]
+    }
+  ],
+  "bun": {
+    "enabled": true
+  },
+  "postUpdateOptions": [
+    "bunInstall"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 3am on the first day of the month"],
+    "commitMessageAction": "Refresh lock file"
+  },
+  "commitMessagePrefix": "deps:",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "rebaseWhen": "conflicted",
+  "assignees": ["maintainer-team"],
+  "reviewersFromCodeOwners": true,
+  "platformAutomerge": false,
+  "ignoreTests": true,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/dist/**"
+  ]
+}

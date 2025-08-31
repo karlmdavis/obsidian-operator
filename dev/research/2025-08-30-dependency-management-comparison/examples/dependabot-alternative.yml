@@ -1,0 +1,74 @@
+# Alternative Dependabot configuration for comparison
+# Location: .github/dependabot.yml
+
+version: 2
+updates:
+  # NPM/Bun packages
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "maintainer-team"
+    assignees:
+      - "maintainer-team"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    groups:
+      # Group Obsidian-related dependencies
+      obsidian-core:
+        patterns:
+          - "obsidian"
+          - "@types/obsidian"
+      
+      # Group TypeScript and build tools
+      build-tools:
+        patterns:
+          - "typescript"
+          - "bun-types"
+          - "@types/*"
+          - "biome" 
+          - "@biomejs/*"
+      
+      # Group testing dependencies
+      testing-frameworks:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "happy-dom"
+          - "jsdom"
+      
+      # Group linting and formatting
+      code-quality:
+        patterns:
+          - "biome"
+          - "@biomejs/*"
+          - "prettier"
+          - "eslint*"
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "1"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    reviewers:
+      - "maintainer-team"
+
+# Note: Dependabot limitations for this use case:
+# 1. Cannot auto-merge based on update type (patch vs major)
+# 2. Limited conditional logic for different package patterns
+# 3. No dependency dashboard equivalent
+# 4. Less sophisticated scheduling options
+# 5. Cannot handle post-update commands like "bunInstall"
+# 6. No timezone support
+# 7. Limited integration with external vulnerability sources
