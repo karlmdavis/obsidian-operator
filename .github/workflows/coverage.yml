@@ -48,24 +48,6 @@ jobs:
     - name: Run quality checks with coverage
       run: bun run ci:coverage
 
-    - name: Check diff coverage (PR only)
-      if: github.event_name == 'pull_request'
-      run: |
-        echo "Checking coverage for changed files..."
-        
-        # Get list of changed TypeScript files
-        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(ts|tsx)$' | grep -v -E '\.(test|spec)\.' || true)
-        
-        if [ -z "$CHANGED_FILES" ]; then
-          echo "No non-test TypeScript files changed"
-          exit 0
-        fi
-        
-        echo "Changed files:"
-        echo "$CHANGED_FILES" | sed 's/^/  - /'
-        
-        echo "✅ Diff coverage check completed"
-
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
