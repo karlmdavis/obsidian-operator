@@ -1,0 +1,44 @@
+[install]
+# Install exact versions to avoid compatibility issues
+exact = true
+
+# Use the most compatible registry
+registry = "https://registry.npmjs.org/"
+
+# Optional: Enable peer dependency auto-install
+auto = false
+
+[test]
+# Test setup file for DOM globals and mocks
+preload = ["./tests/setup/happydom.ts"]
+
+# Test timeout (default: 5000ms)
+timeout = 10000
+
+# Coverage configuration
+coverage = true
+coverageSkipTestFiles = true
+coverageThreshold = { line = 80 }
+
+# Exclude test files and mocks from coverage reports
+coveragePathIgnorePatterns = [
+  "tests/**/*",
+  "**/*.test.ts",
+  "**/*.spec.ts",
+  "**/mocks/**"
+]
+
+# Performance options
+[test.performance]
+# Parallel test execution
+parallel = true
+
+# Maximum number of test files to run in parallel
+maxConcurrency = 4
+
+# Bail on first test failure (faster feedback)
+bail = false
+
+# Environment variables for testing
+[test.env]
+NODE_ENV = "test"

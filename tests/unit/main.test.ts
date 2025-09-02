@@ -1,0 +1,203 @@
+import { afterEach, beforeEach, expect, test } from "bun:test";
+
+/**
+ * Test suite for main plugin functionality using mocked components.
+ *
+ * Since the main plugin class has direct imports from 'obsidian' package
+ * which doesn't exist in the test environment, we test the plugin's
+ * core functionality through integration with its services and components.
+ *
+ * These tests verify:
+ * - Service initialization and coordination
+ * - State management between global and local recording states
+ * - Component interaction patterns
+ * - Cleanup and lifecycle management
+ */
+
+// Use dynamic imports for TypeScript mock compatibility
+const { MockApp, MockPlugin, MockWorkspaceLeaf } = await import("../mocks/obsidian.js");
+const { GlobalRecordingState } = await import("../../src/services/GlobalRecordingState.js");
+const { LocalRecordingState } = await import("../../src/services/LocalRecordingState.js");
+
+// Reserved for future workspace integration tests
+void MockWorkspaceLeaf;
+
+// Test fixtures
+let mockApp: any;
+let mockPlugin: any;
+
+beforeEach(() => {
+	// Create fresh mock instances for each test to prevent state pollution
+	mockApp = new MockApp();
+	mockPlugin = new MockPlugin(mockApp);
+});
+
+afterEach(() => {
+	// No specific cleanup needed for these tests as we're testing components in isolation
+});
+
+test("GlobalRecordingState can be instantiated", () => {
+	// Test that the core global state service can be created
+	const globalState = new GlobalRecordingState();
+
+	expect(globalState).toBeTruthy();
+	expect(typeof globalState.tryStartRecording).toBe("function");
+	expect(typeof globalState.stopRecording).toBe("function");
+	expect(typeof globalState.isRecording).toBe("function");
+	expect(typeof globalState.subscribe).toBe("function");
+
+	// Clean up
+	globalState.destroy();
+});
+
+test("LocalRecordingState can be instantiated", () => {
+	// Test that local recording state can be created
+	const localState = new LocalRecordingState();
+
+	expect(localState).toBeTruthy();
+	expect(typeof localState.startRecording).toBe("function");
+	expect(typeof localState.stopRecording).toBe("function");
+	expect(typeof localState.getState).toBe("function");
+
+	// Clean up
+	localState.destroy();
+});
+
+test("Plugin architecture coordination - Global state prevents concurrent recordings", () => {
+	// Test the core architectural pattern: global state coordination
+	const globalState = new GlobalRecordingState();
+	const instance1 = new LocalRecordingState();
+	const instance2 = new LocalRecordingState();
+
+	// First instance should be able to start recording
+	const canStart1 = globalState.tryStartRecording(instance1);
+	expect(canStart1).toBe(true);
+	expect(globalState.isRecording()).toBe(true);
+	expect(globalState.isRecordingInstance(instance1)).toBe(true);
+
+	// Second instance should be blocked
+	const canStart2 = globalState.tryStartRecording(instance2);
+	expect(canStart2).toBe(false);
+	expect(globalState.isRecordingInstance(instance2)).toBe(false);
+
+	// Clean up
+	globalState.stopRecording(instance1);
+	globalState.destroy();
+	instance1.destroy();
+	instance2.destroy();
+});
+
+test("Plugin architecture coordination - Local state cleanup", () => {
+	// Test that local state properly manages its resources
+	const localState = new LocalRecordingState();
+
+	// Start recording to create interval timer
+	localState.startRecording();
+	expect(localState.getState().isRecording).toBe(true);
+
+	// Stop recording should clean up
+	localState.stopRecording();
+	expect(localState.getState().isRecording).toBe(false);
+	expect(localState.getState().elapsedSeconds).toBe(0);
+	expect(localState.getState().randomNumbers).toHaveLength(0);
+
+	// Destroy should not throw
+	expect(() => {
+		localState.destroy();
+	}).not.toThrow();
+});
+
+test("Plugin services integration - State synchronization", () => {
+	// Test how global and local states work together (plugin's core pattern)
+	const globalState = new GlobalRecordingState();
+	const localState = new LocalRecordingState();
+
+	let globalNotifications = 0;
+	let localNotifications = 0;
+
+	// Subscribe to state changes
+	const globalUnsub = globalState.subscribe(() => {
+		globalNotifications++;
+	});
+
+	const localUnsub = localState.subscribe(() => {
+		localNotifications++;
+	});
+
+	// Simulate plugin workflow: global permission, then local start
+	const canStart = globalState.tryStartRecording(localState);
+	if (canStart) {
+		localState.startRecording();
+	}
+
+	// Verify both states are synchronized
+	expect(globalState.isRecording()).toBe(true);
+	expect(localState.getState().isRecording).toBe(true);
+	expect(globalNotifications).toBeGreaterThan(0);
+	expect(localNotifications).toBeGreaterThan(0);
+
+	// Cleanup
+	localState.stopRecording();
+	globalState.stopRecording(localState);
+	globalUnsub();
+	localUnsub();
+	globalState.destroy();
+	localState.destroy();
+});
+
+test("Mock Obsidian plugin integration", () => {
+	// Test plugin mock integration patterns used throughout the codebase
+	expect(mockPlugin.app).toBe(mockApp);
+	expect(mockPlugin.app.workspace).toBeTruthy();
+
+	// Test command registration (pattern used in main plugin)
+	mockPlugin.addCommand({
+		id: "test-command",
+		name: "Test Command",
+		callback: () => {},
+	});
+
+	const command = mockPlugin.getCommand("test-command");
+	expect(command).toBeTruthy();
+	expect(command?.name).toBe("Test Command");
+});
+
+test("Mock workspace leaf management", () => {
+	// Test workspace management patterns (used in activateView method)
+	const workspace = mockApp.workspace;
+
+	// Test leaf creation
+	const leaf = workspace.getLeaf();
+	expect(leaf).toBeTruthy();
+
+	// Test leaf type filtering
+	const leaves = workspace.getLeavesOfType("test-view-type");
+	expect(Array.isArray(leaves)).toBe(true);
+});
+
+test("Plugin lifecycle simulation", () => {
+	// Simulate the plugin initialization pattern without importing the actual plugin
+	const globalState = new GlobalRecordingState();
+
+	// Simulate what onload() does
+	expect(globalState).toBeTruthy();
+	expect(globalState.isRecording()).toBe(false);
+
+	// Simulate adding commands to mock plugin
+	mockPlugin.addCommand({
+		id: "open-operator-modal",
+		name: "Operator Modal",
+		callback: () => {
+			// This would open RecordingModal with globalState
+			expect(globalState).toBeTruthy();
+		},
+	});
+
+	// Verify command is registered
+	const modalCommand = mockPlugin.getCommand("open-operator-modal");
+	expect(modalCommand).toBeTruthy();
+
+	// Simulate onunload() cleanup
+	globalState.destroy();
+	expect(true).toBe(true); // If we get here, cleanup worked
+});

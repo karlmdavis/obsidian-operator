@@ -4,23 +4,20 @@
   "extends": [
     "config:js-lib",
     ":dependencyDashboard",
-    ":semanticCommitsDisabled",
+    ":semanticPrefixFixDepsChoreOthers",
     ":ignoreModulesAndTests",
     "group:monorepos",
     "helpers:disableTypesNodeMajor"
   ],
-  "timezone": "America/New_York",
-  "schedule": ["after 10pm and before 6am every weekday", "every weekend"],
-  "labels": ["dependencies", "renovate"],
-  "assignees": ["karlmdavis"],
+  "schedule": ["after 9pm", "before 9am"],
+  "timezone": "America/Los_Angeles",
   "packageRules": [
     {
       "description": "Obsidian core API and types - weekly updates on Monday",
-      "groupName": "Obsidian API",
+      "groupName": "obsidian core",
       "matchPackagePatterns": ["^obsidian$", "^@types/obsidian"],
       "schedule": ["on monday"],
-      "reviewers": ["karlmdavis"],
-      "automerge": false
+      "reviewers": ["maintainer-team"]
     },
     {
       "description": "Voice processing and AI dependencies - careful review required",
@@ -34,9 +31,8 @@
         "whisper",
         "voice"
       ],
-      "reviewers": ["karlmdavis"],
-      "schedule": ["on saturday"],
-      "automerge": false
+      "reviewers": ["voice-experts"],
+      "schedule": ["on saturday"]
     },
     {
       "description": "Build and development tooling - can be auto-merged for patches",
@@ -45,13 +41,12 @@
         "^@types/",
         "typescript",
         "bun-types",
-        "@biomejs/biome",
-        "esbuild",
-        "builtin-modules"
+        "biome",
+        "@biomejs/*",
+        "vitest",
+        "@vitest/*"
       ],
       "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true,
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "schedule": ["before 6am on weekdays"]
     },
@@ -59,15 +54,13 @@
       "description": "Testing framework updates - grouped for easier review",
       "groupName": "testing frameworks",
       "matchPackagePatterns": [
-        "@happy-dom/*",
-        "happy-dom",
         "vitest",
-        "@testing-library/*"
+        "@vitest/*",
+        "@testing-library/*",
+        "happy-dom",
+        "jsdom"
       ],
-      "schedule": ["on friday"],
-      "automerge": true,
-      "automergeType": "pr",
-      "matchUpdateTypes": ["minor", "patch"]
+      "schedule": ["on friday"]
     },
     {
       "description": "GitHub Actions - monthly updates to avoid CI churn",
@@ -75,36 +68,22 @@
       "matchManagers": ["github-actions"],
       "schedule": ["on the first day of the month"],
       "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true,
       "matchUpdateTypes": ["patch", "pin", "digest"]
     },
     {
       "description": "Security updates - highest priority, immediate processing",
-      "matchDepTypes": ["dependencies", "devDependencies"],
+      "matchDepTypes": ["dependencies"],
       "vulnerabilityAlerts": {
         "enabled": true
       },
-      "prPriority": 15,
-      "schedule": ["at any time"],
-      "labels": ["security", "dependencies", "renovate"],
-      "assignees": ["karlmdavis"]
+      "prPriority": 10,
+      "schedule": ["at any time"]
     },
     {
       "description": "Major version updates - manual review required",
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true,
-      "reviewers": ["karlmdavis"],
-      "automerge": false
-    },
-    {
-      "description": "Automatically merge minor and patch updates for dev dependencies",
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "excludePackagePatterns": ["^obsidian$", "openai", "anthropic", "@anthropic-ai/*"],
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true
+      "reviewers": ["maintainer-team"]
     }
   ],
   "bun": {
@@ -118,25 +97,19 @@
     "schedule": ["before 3am on the first day of the month"],
     "commitMessageAction": "Refresh lock file"
   },
-  "vulnerabilityAlerts": {
-    "labels": ["security", "renovate"],
-    "assignees": ["karlmdavis"],
-    "prPriority": 15
-  },
-  "prConcurrentLimit": 3,
+  "commitMessagePrefix": "deps:",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
-  "prCreation": "immediate",
-  "rangeStrategy": "auto",
-  "semanticCommits": "disabled",
   "rebaseWhen": "conflicted",
+  "assignees": ["maintainer-team"],
   "reviewersFromCodeOwners": true,
   "platformAutomerge": false,
   "ignoreTests": true,
   "ignorePaths": [
-    "**/node_modules/**", 
-    "**/dist/**", 
-    "**/build/**",
+    "**/node_modules/**",
     "**/coverage/**",
-    "**/dev/research/**"
+    "**/dist/**"
   ]
 }

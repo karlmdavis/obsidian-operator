@@ -1,0 +1,11 @@
+{
+  "id": "obsidian-operator",
+  "name": "Obsidian Operator",
+  "version": "0.0.1",
+  "minAppVersion": "0.15.0",
+  "description": "Safe, hands-free voice-driven transcription and editing for commuting and mobile contexts",
+  "author": "Karl M Davis",
+  "authorUrl": "https://github.com/karlmdavis",
+  "fundingUrl": "https://github.com/sponsors/karlmdavis",
+  "isDesktopOnly": false
+}

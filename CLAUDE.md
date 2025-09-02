@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Obsidian Operator** is an experimental Obsidian plugin for safe, hands-free voice-driven transcription and editing, designed specifically for use while commuting or otherwise unable to use touch interactions.
 
-The project is currently in the **early exploration phase** with no code implementation yet.
+The project has completed **Phase 1: Hello World Plugin** with a functional foundation and is ready for **Phase 2: Core Voice Interface** implementation.
 
 ## Architecture & Design
 
@@ -46,9 +46,16 @@ When reading `CLAUDE.md`, please also be sure to read `CONTRIBUTING.md`.
 - Wrapped lines indented by two spaces
 
 ### TypeScript Conventions
-- Follow established linters and formatters (to be configured in phase 1)
+- **Strict linting enforcement**: All linting rules must remain enabled and issues addressed directly
+- Never disable or bypass linting rules globally - use targeted suppressions only when absolutely necessary
 - Unit test coverage required for all functions
 - Use Obsidian Plugin API patterns and conventions
+
+### Code Documentation Standards
+- **Comprehensive commenting**: All functions, classes, and complex types should have JSDoc comments explaining both "what" and "why"
+- **TypeScript newcomer friendly**: Comments should educate beginners about language features, patterns, and architectural decisions
+- **Focus on the "why"**: Explain architectural decisions, design patterns, and business logic rationale beyond what the code shows
+- **Reference examples**: See `src/main.ts` for excellent examples of the commenting style expected in this codebase
 
 ## Development Workflow
 
@@ -62,11 +69,38 @@ All changes to this repository follow a PR-based workflow:
 
 ### Build & Development Commands
 
-*Note: These commands will be established during phase 1 (Hello World Plugin) implementation:*
-- Build process: TBD (TypeScript compilation)
-- Testing: TBD (unit test framework)
-- Linting: TBD (ESLint or similar)
-- Local development: TBD (Obsidian plugin development setup)
+```bash
+# Building
+bun run build      # Production build (compiles and copies to vault, then exits)
+bun run dev        # Development mode with watch and hot reload (runs continuously)
+
+# Testing
+bun test           # Run all tests
+bun test:watch     # Run tests in watch mode
+
+# Code Quality (Individual)
+bun run lint       # Check for linting issues
+bun run format     # Auto-format code
+bun run lint:fix   # Fix auto-fixable linting issues
+bun run typecheck  # TypeScript type checking
+
+# Code Quality (CI Tasks - Recommended for verification)
+bun run ci:quality # Run all quality checks (lint + typecheck + coverage)
+bun run ci:coverage # Run coverage analysis only
+```
+
+### Code Quality Standards
+- **Linting is mandatory**: All code must pass linting without errors
+- Use `// biome-ignore lint: reason` for targeted suppressions only when absolutely necessary
+- Common acceptable suppression cases:
+  - Mock files requiring `any` types to simulate external APIs
+  - Test files accessing private properties for testing purposes
+  - Type assertions in specific testing scenarios
+- Always provide clear, descriptive reasons for any lint suppressions
+
+**Important**: 
+- When testing builds, use `bun run build` (not `bun run dev`) as it completes and exits. The `dev` command runs indefinitely in watch mode.
+- When verifying code quality, use `bun run ci:quality` to run the same checks as CI/CD.
 
 ## Known Constraints
 

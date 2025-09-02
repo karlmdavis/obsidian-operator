@@ -10,30 +10,22 @@ pnpm-debug.log*
 dist/
 build/
 out/
-*.js
+# Only ignore the compiled plugin output
+main.js
 *.js.map
-*.d.ts
-!jest.config.js
-!*.config.js
 
-# IDE and editor files
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-.idea/
+# Editor temporary files
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
 
 # Testing
 coverage/
+coverage-html/
 .nyc_output/
 test-results/
 *.lcov
+.coverage-history/
 
 # Environment variables
 .env
@@ -41,9 +33,6 @@ test-results/
 .env.*.local
 
 # Obsidian plugin development
-main.js
-styles.css
-manifest.json
 .hotreload/
 
 # Package manager files
@@ -69,4 +58,5 @@ logs/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+Thumbs.db
 Desktop.ini
