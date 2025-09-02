@@ -2,7 +2,7 @@ import { type App, Modal } from "obsidian";
 import { RecordingUI } from "../components/RecordingUI.js";
 import type { GlobalRecordingState } from "../services/GlobalRecordingState.js";
 import { LocalRecordingState } from "../services/LocalRecordingState.js";
-import type { RecordingUICallbacks } from "../types/index.js";
+import type { RecordingUICallbacks } from "./types.js";
 
 export class RecordingModal extends Modal {
 	private recordingUI: RecordingUI | null = null;

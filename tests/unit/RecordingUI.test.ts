@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { RecordingUI } from "../../src/components/RecordingUI.js";
-import type { RecordingUICallbacks, RecordingUIProps } from "../../src/types/index.js";
+import type { RecordingUIProps } from "../../src/components/types.js";
+import type { RecordingUICallbacks } from "../../src/views/types.js";
 
 function createMockContainer(): HTMLElement {
 	const container = document.createElement("div");

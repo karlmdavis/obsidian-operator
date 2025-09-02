@@ -1,4 +1,4 @@
-import type { RecordingUIProps } from "../types/index.js";
+import type { RecordingUIProps } from "./types.js";
 
 /**
  * Reusable UI component for recording controls and status display.
