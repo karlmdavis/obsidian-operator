@@ -19,8 +19,8 @@ test("Module structure is valid", () => {
 	expect(typeof LocalRecordingState).toBe("function");
 });
 
-test("Mock Obsidian classes exist", () => {
-	const { MockApp, MockPlugin, MockModal } = require("../mocks/obsidian.js");
+test("Mock Obsidian classes exist", async () => {
+	const { MockApp, MockPlugin, MockModal } = await import("../mocks/obsidian.js");
 
 	expect(MockApp).toBeTruthy();
 	expect(MockPlugin).toBeTruthy();

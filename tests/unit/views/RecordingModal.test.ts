@@ -12,10 +12,10 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
  * - UI state synchronization patterns
  */
 
-// Use require() to avoid Obsidian package resolution issues in test environment
-const { MockApp, MockModal, MockScope } = require("../../mocks/obsidian.js");
-const { GlobalRecordingState } = require("../../../src/services/GlobalRecordingState.js");
-const { LocalRecordingState } = require("../../../src/services/LocalRecordingState.js");
+// Use dynamic imports for TypeScript mock compatibility
+const { MockApp, MockModal, MockScope } = await import("../../mocks/obsidian.js");
+const { GlobalRecordingState } = await import("../../../src/services/GlobalRecordingState.js");
+const { LocalRecordingState } = await import("../../../src/services/LocalRecordingState.js");
 
 // Reserved for future modal scope management tests
 void MockScope;
@@ -65,7 +65,7 @@ test("Modal pattern: unique instance ID generation", () => {
 test("Modal pattern: dual-state coordination", () => {
 	// Test the core pattern: global state coordination with local state
 	const modalInstanceId = "modal-test-456";
-	const modalLocalState = new LocalRecordingState(modalInstanceId);
+	const modalLocalState = new LocalRecordingState();
 
 	// Initially, no recording should be active
 	expect(globalState.isRecording()).toBe(false);
@@ -98,8 +98,8 @@ test("Modal pattern: prevents concurrent recordings", () => {
 	const modalId1 = "modal-test-001";
 	const modalId2 = "modal-test-002";
 
-	const localState1 = new LocalRecordingState(modalId1);
-	const localState2 = new LocalRecordingState(modalId2);
+	const localState1 = new LocalRecordingState();
+	const localState2 = new LocalRecordingState();
 
 	// First modal gets recording permission
 	const canRecord1 = globalState.tryStartRecording(modalId1);
@@ -195,7 +195,7 @@ test("Modal pattern: escape shortcut stops and closes", () => {
 
 test("Modal pattern: cleanup and resource management", () => {
 	// Test the cleanup patterns used by RecordingModal
-	const modalLocalState = new LocalRecordingState("modal-cleanup-test");
+	const modalLocalState = new LocalRecordingState();
 	const globalListenerRemoved = false;
 	const localListenerRemoved = false;
 
@@ -267,7 +267,7 @@ test("Modal pattern: state observer synchronization", () => {
 test("Modal pattern: external state change handling", () => {
 	// Test how modal handles external global state changes
 	const modalId = "modal-external-test";
-	const modalLocalState = new LocalRecordingState(modalId);
+	const modalLocalState = new LocalRecordingState();
 
 	// Initially modal can record
 	let canRecord = !globalState.isRecording() || globalState.isRecordingInstance(modalId);
@@ -316,7 +316,7 @@ test("Modal pattern: error resilience in double operations", () => {
 test("Modal pattern: UI props calculation logic", () => {
 	// Test the logic used to calculate RecordingUI props
 	const modalId = "modal-ui-props-test";
-	const modalLocalState = new LocalRecordingState(modalId);
+	const modalLocalState = new LocalRecordingState();
 
 	// Test initial state calculation
 	const isGlobalRecording = globalState.isRecording();

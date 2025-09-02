@@ -14,10 +14,10 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
  * - Cleanup and lifecycle management
  */
 
-// Use require() to avoid Obsidian package resolution issues in test environment
-const { MockApp, MockPlugin, MockWorkspaceLeaf } = require("../mocks/obsidian.js");
-const { GlobalRecordingState } = require("../../src/services/GlobalRecordingState.js");
-const { LocalRecordingState } = require("../../src/services/LocalRecordingState.js");
+// Use dynamic imports for TypeScript mock compatibility
+const { MockApp, MockPlugin, MockWorkspaceLeaf } = await import("../mocks/obsidian.js");
+const { GlobalRecordingState } = await import("../../src/services/GlobalRecordingState.js");
+const { LocalRecordingState } = await import("../../src/services/LocalRecordingState.js");
 
 // Reserved for future workspace integration tests
 void MockWorkspaceLeaf;
@@ -110,7 +110,7 @@ test("Plugin architecture coordination - Local state cleanup", () => {
 test("Plugin services integration - State synchronization", () => {
 	// Test how global and local states work together (plugin's core pattern)
 	const globalState = new GlobalRecordingState();
-	const localState = new LocalRecordingState("sync-test");
+	const localState = new LocalRecordingState();
 
 	let globalNotifications = 0;
 	let localNotifications = 0;

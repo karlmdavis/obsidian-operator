@@ -11,29 +11,9 @@ It's particularly necessary since I'm relying so heavily on LLM-generated code:
 
 ### Commit `3c6dacf6913ec1b8e5ef07543a8772d91de900ce`
 
-What does the `claude.yml` workflow do?
-
-Why does `codeql.yml` run for both JS and TS?
-
 In the `coverage.yml` workflow...
 
-- Is anything using the diff coverage data that gets generated?
-- Why upload to codecov with the fallback to coveralls?
-- The "Comment PR with coverage report" step seems real custom. Isn't there anything that does that out of the box?
 - Does the trend analysis at the end work? How? Is it storing coverage in Git objects attached to the commits?
-
-In the `pr-validation.yml` workflow...
-
-- Why is "Check for merge conflicts" there if it's a no-op and handled by GH itself?
-- The "Validate file changes" step seems silly if all it's doing is logging a warning that nothing checks.
-- What's the point of the "Label PR based on files changed" step? Not seeing the value.
-
-What's the point of all the extra sections in `CODEOWNERS`?
-
-Why is `indentStyle` set to tabs? Aren't spaces idiomatic?
-
-In `biome.json`, why are `noNonNullAssertion` and `noExplicitAny` disabled?
-If it's for mocks/tests, can that be path-scoped?
 
 `build.ts`...
 
