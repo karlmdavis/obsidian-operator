@@ -87,7 +87,16 @@ bun run typecheck  # TypeScript type checking
 # Code Quality (CI Tasks - Recommended for verification)
 bun run ci:quality # Run all quality checks (lint + typecheck + coverage)
 bun run ci:coverage # Run coverage analysis only
+
+# Coverage Reports
+bun run test:coverage:text # Text coverage (only shows files imported by tests)
+bun run test:coverage:lcov # LCOV format (complete coverage data)
 ```
+
+### Coverage Reporting Notes
+- **Text reporter limitation**: Bun's text coverage reporter only shows files that are imported by tests, which can give misleadingly high percentages
+- **Use LCOV for accuracy**: The LCOV reporter provides complete coverage across all source files
+- **GitHub Actions coverage**: The PR coverage comments use LCOV data and provide the most accurate coverage reporting
 
 ### Code Quality Standards
 - **Linting is mandatory**: All code must pass linting without errors
