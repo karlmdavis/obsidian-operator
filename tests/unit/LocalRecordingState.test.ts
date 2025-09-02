@@ -31,19 +31,15 @@ test("LocalRecordingState - duration formatting", () => {
 	const state = new LocalRecordingState();
 
 	// Manually set elapsed time for testing
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).elapsedSeconds = 0;
 	expect(state.getState().formattedDuration).toBe("00:00");
 
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).elapsedSeconds = 59;
 	expect(state.getState().formattedDuration).toBe("00:59");
 
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).elapsedSeconds = 60;
 	expect(state.getState().formattedDuration).toBe("01:00");
 
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).elapsedSeconds = 125;
 	expect(state.getState().formattedDuration).toBe("02:05");
 });
@@ -52,22 +48,18 @@ test("LocalRecordingState - random numbers formatting", () => {
 	const state = new LocalRecordingState();
 
 	// Manually set random numbers for testing
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).randomNumbers = [];
 	expect(state.getState().formattedRandoms).toBe("");
 
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).randomNumbers = [42];
 	expect(state.getState().formattedRandoms).toBe("42...");
 
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).randomNumbers = [42, 7, 99];
 	expect(state.getState().formattedRandoms).toBe("42... 7... 99...");
 });
 
 test("LocalRecordingState - timer increments", async () => {
 	const state = new LocalRecordingState();
-	// biome-ignore lint: Test array needs any type for flexible data collection
 	const updates: any[] = [];
 
 	const unsubscribe = state.subscribe((stateData) => {
@@ -103,9 +95,7 @@ test("LocalRecordingState - stop clears data", () => {
 	const state = new LocalRecordingState();
 
 	// Manually set some data
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).elapsedSeconds = 10;
-	// biome-ignore lint: Testing private properties requires any cast
 	(state as any).randomNumbers = [1, 2, 3];
 
 	state.stopRecording();

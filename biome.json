@@ -17,10 +17,10 @@
 		"rules": {
 			"recommended": true,
 			"style": {
-				"noNonNullAssertion": "off"
+				"noNonNullAssertion": "error"
 			},
 			"suspicious": {
-				"noExplicitAny": "warn"
+				"noExplicitAny": "error"
 			}
 		}
 	},
@@ -38,5 +38,20 @@
 	"files": {
 		"include": ["src/**/*.ts", "tests/**/*.ts"],
 		"ignore": ["node_modules", "main.js", "build"]
-	}
+	},
+	"overrides": [
+		{
+			"include": ["tests/**/*.ts", "build.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noNonNullAssertion": "off"
+					},
+					"suspicious": {
+						"noExplicitAny": "off"
+					}
+				}
+			}
+		}
+	]
 }

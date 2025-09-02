@@ -5,15 +5,12 @@ import type { RecordingUICallbacks, RecordingUIProps } from "../../src/types/ind
 function createMockContainer(): HTMLElement {
 	const container = document.createElement("div");
 	// Add basic methods that RecordingUI expects
-	// biome-ignore lint: Mock DOM methods require any type
 	(container as any).empty = function () {
 		this.innerHTML = "";
 	};
-	// biome-ignore lint: Mock DOM methods require any type
 	(container as any).addClass = function (className: string) {
 		this.classList.add(className);
 	};
-	// biome-ignore lint: Mock DOM methods require any type
 	(container as any).createEl = function (tagName: string, options?: any) {
 		const element = document.createElement(tagName);
 		if (options?.cls) {

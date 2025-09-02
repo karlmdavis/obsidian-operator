@@ -81,11 +81,9 @@ class MockHTMLElement {
 	}
 }
 
-// biome-ignore lint: Mock environment requires any types
 const { RecordingUI } = require("../../src/components/RecordingUI.js") as any;
 
 // Test fixtures
-// biome-ignore lint: Mock state objects require any type for flexible test data
 let globalState: any;
 let container: MockHTMLElement;
 
@@ -105,7 +103,7 @@ test("Integration: Single UI instance complete recording workflow", () => {
 	const instanceId = "integration-test-1";
 	const localState = new LocalRecordingState(instanceId);
 
-	// biome-ignore lint: Mock UI component requires any type for flexible test interfaces
+	// biome-ignore lint/style/useConst: reassigned when creating UI instance
 	let recordingUI: any;
 	const callbacksTriggered = { record: 0, stop: 0 };
 
@@ -223,7 +221,6 @@ test("Integration: Multi-instance coordination prevents conflicts", () => {
 	};
 
 	// Helper to create UI props
-	// biome-ignore lint: Mock state objects require any type for flexible test data
 	const createProps = (instanceId: string, localState: any) => {
 		const localStateData = localState.getState();
 		const isGlobalRecording = globalState.isRecording();
@@ -301,14 +298,12 @@ test("Integration: State synchronization through observers", () => {
 	let uiUpdates = 0;
 
 	// Set up observers like real modal/view would
-	// biome-ignore lint: Test requires any type for mock observers
 	const globalUnsub = globalState.subscribe((stateInfo: any) => {
 		globalStateChanges++;
 		// In real app, this would trigger UI update
 		uiUpdates++;
 	});
 
-	// biome-ignore lint: Test requires any type for mock observers
 	const localUnsub = localState.subscribe((stateUpdate: any) => {
 		localStateChanges++;
 		// In real app, this would trigger UI update

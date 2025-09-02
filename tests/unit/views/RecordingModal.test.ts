@@ -21,13 +21,9 @@ const { LocalRecordingState } = require("../../../src/services/LocalRecordingSta
 void MockScope;
 
 // Test fixtures
-// biome-ignore lint: Mock objects require any type for flexible test data
 let mockApp: any;
-// biome-ignore lint: Mock objects require any type for flexible test data
 let globalState: any;
-// biome-ignore lint: Mock objects require any type for flexible test data
 let localState: any;
-// biome-ignore lint: Mock objects require any type for flexible test data
 let mockModal: any;
 
 beforeEach(() => {

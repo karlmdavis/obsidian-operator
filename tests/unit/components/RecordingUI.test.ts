@@ -74,12 +74,10 @@ class MockHTMLElement {
 	}
 }
 
-// biome-ignore lint: Mock DOM environment requires any types
 const { RecordingUI } = require("../../../src/components/RecordingUI.js") as any;
 
 // Test fixtures
 let mockContainer: MockHTMLElement;
-// biome-ignore lint: Mock UI component requires any type for flexible test interfaces
 let recordingUI: any;
 let mockCallbacks: { onRecord: () => void; onStop: () => void };
 let recordCallCount: number;
