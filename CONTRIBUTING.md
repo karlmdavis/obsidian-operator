@@ -91,7 +91,7 @@ bun run typecheck  # TypeScript type checking
 # Code Quality (CI Tasks - Recommended)
 bun run ci:quality # Run all quality checks (lint + typecheck + coverage)
 bun run ci:coverage # Run coverage analysis only
-bun run ci:test    # Run tests only
+bun test           # Run tests only
 ```
 
 #### Quality Verification
@@ -135,8 +135,7 @@ bun run ci:coverage               # Coverage with CI validation (recommended)
 
 # Coverage reports
 bun run test:coverage:text        # Generate text coverage report
-bun run coverage:summary          # Coverage summary (same as above)
-bun run test:coverage:check       # Check coverage thresholds
+bun run test:coverage             # Check coverage thresholds
 ```
 
 #### Coverage Standards
@@ -153,7 +152,7 @@ bun run test:coverage:check       # Check coverage thresholds
 - **New Code**: Aim for 90%+ coverage on new features
 - **Bug Fixes**: Include tests that reproduce the bug
 - **Critical Paths**: Ensure 100% coverage for core functionality  
-- **Review**: Use text reports (`bun run coverage:summary`) to identify gaps
+- **Review**: Use text reports (`bun run test:coverage:text`) to identify gaps
 
 Coverage is automatically collected in GitHub Actions and reported on pull requests.
 

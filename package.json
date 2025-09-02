@@ -14,13 +14,8 @@
     "test:coverage:text": "bun test --coverage --coverage-reporter=text",
     "test:coverage:lcov": "bun test --coverage --coverage-reporter=lcov --coverage-dir=./coverage",
     
-    "// Coverage Thresholds": "",
-    "test:coverage:check": "bun test --coverage --coverage-dir=./coverage",
-    "test:coverage:strict": "bun test --coverage --coverage-dir=./coverage",
-    "test:coverage:ci": "bun test --coverage --coverage-reporter=lcov --coverage-dir=./coverage",
     
     "// Coverage Analysis": "",
-    "coverage:summary": "bun test --coverage --coverage-reporter=text",
     "coverage:diff": "bun run coverage:changed-files",
     "coverage:changed-files": "git diff --name-only HEAD~1 | grep -E '\\.(ts|js)$' | xargs bun test --coverage --coverage-include",
     
@@ -32,13 +27,11 @@
     "prepare": "husky",
     
     "// CI/CD Pipeline": "",
-    "ci:test": "bun test",
-    "ci:coverage": "bun run test:coverage:ci",
+    "ci:coverage": "bun run test:coverage:lcov",
     "ci:quality": "bun run lint && bun run typecheck && bun run ci:coverage",
     
     "// Pre-commit Hooks": "",
-    "pre-commit": "bun run lint && bun run typecheck",
-    "pre-push": "bun run ci:quality"
+    "pre-commit": "bun run lint && bun run typecheck && bun test"
   },
   "keywords": [
     "obsidian",
