@@ -51,6 +51,12 @@ When reading `CLAUDE.md`, please also be sure to read `CONTRIBUTING.md`.
 - Unit test coverage required for all functions
 - Use Obsidian Plugin API patterns and conventions
 
+### Code Documentation Standards
+- **Comprehensive commenting**: All functions, classes, and complex types should have JSDoc comments explaining both "what" and "why"
+- **TypeScript newcomer friendly**: Comments should educate beginners about language features, patterns, and architectural decisions
+- **Focus on the "why"**: Explain architectural decisions, design patterns, and business logic rationale beyond what the code shows
+- **Reference examples**: See `src/main.ts` for excellent examples of the commenting style expected in this codebase
+
 ## Development Workflow
 
 ### PR-Based Development

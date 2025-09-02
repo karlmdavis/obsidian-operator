@@ -10,6 +10,7 @@ This project is still experimental, but the intent is to create a plugin that im
 
 - **Bun** (v1.0+): Install from [bun.sh](https://bun.sh)
 - **Node.js** (v18+): For compatibility with some tools
+  - **Recommended**: Use [Volta](https://volta.sh) for Node.js version management
 - **Obsidian**: Desktop app for testing the plugin
 
 ### Initial Setup
@@ -45,7 +46,10 @@ This project is still experimental, but the intent is to create a plugin that im
 #### Automatic Installation with Hot Reload
 
 1. **Install the Hot Reload plugin** in Obsidian:
-   - Community plugins → Browse → Search for "Hot Reload" → Install
+   - This is a developer-only plugin by pjeby: https://github.com/pjeby/hot-reload
+   - Clone or download it to your vault's `.obsidian/plugins/hot-reload/` directory
+   - Enable it in Settings → Community plugins
+   - **Note**: This plugin is not available in the standard community plugin browser as it's for developers only
 
 2. **Set your vault path** (choose one option):
    
@@ -70,6 +74,11 @@ This project is still experimental, but the intent is to create a plugin that im
    - Automatically installs to your vault (no manual copying needed)
    - Creates `.hotreload` file to trigger the Hot Reload plugin
    - Obsidian will automatically reload the plugin when changes are detected
+   
+   **Troubleshooting**: If hot reload isn't working, ensure:
+   - The Hot Reload plugin is installed and enabled
+   - Your `OBSIDIAN_PLUGINS_PATH` points to the correct `.obsidian/plugins` directory
+   - The `.hotreload` file is being created in your plugin directory
 
 ### Development Commands
 
@@ -140,12 +149,11 @@ bun run test:coverage             # Check coverage thresholds
 
 #### Coverage Standards
 
-| Metric | Minimum | Target |
-|--------|---------|--------|
-| Lines | 80% | 85% |
-| Functions | 80% | 85% |
-| Branches | 75% | 80% |
-| Statements | 80% | 85% |
+This project enforces **80% minimum line coverage** with automated validation in CI/CD.
+
+| Metric | Enforced Threshold | Target |
+|--------|-------------------|--------|
+| Lines | 80% (CI enforced) | 85% |
 
 #### Coverage Guidelines
 
@@ -235,6 +243,16 @@ Use `// biome-ignore lint: descriptive reason` only in these specific cases:
 - Local builds: contributors should be able to build, test, and lint locally without extra setup.
 - Build system: **Bun** for fast builds, testing, and dependency management.
 - Code quality: **Biome** for unified linting and formatting.
+
+### Code Documentation Strategy
+
+This project emphasizes comprehensive code documentation to make TypeScript accessible to newcomers:
+
+- **All public functions, classes, and interfaces** must have JSDoc comments
+- **Comments should explain both "what" and "why"** - focus heavily on the reasoning behind architectural decisions
+- **TypeScript education**: Comments should help newcomers understand TypeScript patterns, language features, and design decisions
+- **Examples**: See `src/main.ts` for the expected commenting style - detailed explanations of class purposes, method behavior, and architectural reasoning
+- **Code reviews**: PRs should include review of comment quality, not just code functionality
 
 ### Constraints
 
