@@ -34,7 +34,7 @@ beforeEach(() => {
 	// Create fresh instances for each test to prevent state pollution
 	mockApp = new MockApp();
 	globalState = new GlobalRecordingState();
-	localState = new LocalRecordingState("modal-test-123");
+	localState = new LocalRecordingState();
 	mockModal = new MockModal(mockApp);
 });
 
@@ -141,14 +141,14 @@ test("Modal pattern: keyboard shortcuts handling", () => {
 	scope.register(["Mod"], "Enter", () => {
 		// Simulate record/stop toggle logic
 		if (!globalState.isRecording()) {
-			const canStart = globalState.tryStartRecording(localState.getId());
+			const canStart = globalState.tryStartRecording(localState);
 			if (canStart) {
 				localState.startRecording();
 				recordActionTriggered = true;
 			}
-		} else if (globalState.isRecordingInstance(localState.getId())) {
+		} else if (globalState.isRecordingInstance(localState)) {
 			localState.stopRecording();
-			globalState.stopRecording(localState.getId());
+			globalState.stopRecording(localState);
 			stopActionTriggered = true;
 		}
 	});
@@ -173,15 +173,15 @@ test("Modal pattern: escape shortcut stops and closes", () => {
 	let modalClosed = false;
 
 	// Start recording first
-	globalState.tryStartRecording(localState.getId());
+	globalState.tryStartRecording(localState);
 	localState.startRecording();
 	expect(globalState.isRecording()).toBe(true);
 
 	// Register escape shortcut pattern
 	scope.register(["Mod"], "Escape", () => {
-		if (globalState.isRecordingInstance(localState.getId())) {
+		if (globalState.isRecordingInstance(localState)) {
 			localState.stopRecording();
-			globalState.stopRecording(localState.getId());
+			globalState.stopRecording(localState);
 		}
 		modalClosed = true; // Simulate modal.close()
 	});
@@ -208,7 +208,7 @@ test("Modal pattern: cleanup and resource management", () => {
 	void localListenerRemoved;
 
 	// Start recording to create resources that need cleanup
-	globalState.tryStartRecording(modalLocalState.getId());
+	globalState.tryStartRecording(modalLocalState);
 	modalLocalState.startRecording();
 	expect(globalState.isRecording()).toBe(true);
 
@@ -217,9 +217,9 @@ test("Modal pattern: cleanup and resource management", () => {
 	const unsubLocal = modalLocalState.subscribe(() => {});
 
 	// Simulate modal close cleanup pattern
-	if (globalState.isRecordingInstance(modalLocalState.getId())) {
+	if (globalState.isRecordingInstance(modalLocalState)) {
 		modalLocalState.stopRecording();
-		globalState.stopRecording(modalLocalState.getId());
+		globalState.stopRecording(modalLocalState);
 	}
 
 	// Cleanup listeners
@@ -246,7 +246,7 @@ test("Modal pattern: state observer synchronization", () => {
 	});
 
 	// Start recording - should trigger notifications
-	globalState.tryStartRecording(localState.getId());
+	globalState.tryStartRecording(localState);
 	localState.startRecording();
 
 	// Both observers should have been notified
@@ -258,7 +258,7 @@ test("Modal pattern: state observer synchronization", () => {
 	const previousLocal = localNotifications;
 
 	localState.stopRecording();
-	globalState.stopRecording(localState.getId());
+	globalState.stopRecording(localState);
 
 	expect(globalNotifications).toBeGreaterThan(previousGlobal);
 	expect(localNotifications).toBeGreaterThan(previousLocal);

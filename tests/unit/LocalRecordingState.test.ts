@@ -2,9 +2,7 @@ import { expect, test } from "bun:test";
 import { LocalRecordingState } from "../../src/services/LocalRecordingState.js";
 
 test("LocalRecordingState - initial state", () => {
-	const state = new LocalRecordingState("test-id");
-
-	expect(state.getId()).toBe("test-id");
+	const state = new LocalRecordingState();
 
 	const stateData = state.getState();
 	expect(stateData.isRecording).toBe(false);
@@ -15,7 +13,7 @@ test("LocalRecordingState - initial state", () => {
 });
 
 test("LocalRecordingState - start and stop recording", () => {
-	const state = new LocalRecordingState("test-id");
+	const state = new LocalRecordingState();
 
 	state.startRecording();
 	let stateData = state.getState();
@@ -30,7 +28,7 @@ test("LocalRecordingState - start and stop recording", () => {
 });
 
 test("LocalRecordingState - duration formatting", () => {
-	const state = new LocalRecordingState("test-id");
+	const state = new LocalRecordingState();
 
 	// Manually set elapsed time for testing
 	// biome-ignore lint: Testing private properties requires any cast
@@ -51,7 +49,7 @@ test("LocalRecordingState - duration formatting", () => {
 });
 
 test("LocalRecordingState - random numbers formatting", () => {
-	const state = new LocalRecordingState("test-id");
+	const state = new LocalRecordingState();
 
 	// Manually set random numbers for testing
 	// biome-ignore lint: Testing private properties requires any cast
@@ -68,7 +66,7 @@ test("LocalRecordingState - random numbers formatting", () => {
 });
 
 test("LocalRecordingState - timer increments", async () => {
-	const state = new LocalRecordingState("test-id");
+	const state = new LocalRecordingState();
 	// biome-ignore lint: Test array needs any type for flexible data collection
 	const updates: any[] = [];
 
@@ -102,7 +100,7 @@ test("LocalRecordingState - timer increments", async () => {
 });
 
 test("LocalRecordingState - stop clears data", () => {
-	const state = new LocalRecordingState("test-id");
+	const state = new LocalRecordingState();
 
 	// Manually set some data
 	// biome-ignore lint: Testing private properties requires any cast
@@ -120,7 +118,7 @@ test("LocalRecordingState - stop clears data", () => {
 });
 
 test("LocalRecordingState - destroy cleanup", async () => {
-	const state = new LocalRecordingState("test-id");
+	const state = new LocalRecordingState();
 
 	state.startRecording();
 

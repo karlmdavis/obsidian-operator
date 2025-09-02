@@ -20,12 +20,6 @@ import type { EventListener, UnsubscribeFunction } from "../types/index.js";
 export type LocalStateListener = EventListener<LocalStateUpdate>;
 export class LocalRecordingState {
 	/**
-	 * Unique identifier for this recording instance, used to coordinate with GlobalRecordingState.
-	 * Format typically: "modal-{timestamp}" or "view-{uuid}" to ensure uniqueness.
-	 */
-	private instanceId: string;
-
-	/**
 	 * Local recording status - distinct from global state.
 	 * This tracks whether THIS component thinks it's recording, while global state
 	 * determines whether it's ALLOWED to record.
@@ -56,18 +50,6 @@ export class LocalRecordingState {
 	 * Separate from global listeners - these are specific to this UI component.
 	 */
 	private listeners = new Set<LocalStateListener>();
-
-	constructor(instanceId: string) {
-		this.instanceId = instanceId;
-	}
-
-	/**
-	 * Returns the unique identifier for this recording instance.
-	 * Used by GlobalRecordingState to track which component is recording.
-	 */
-	getId(): string {
-		return this.instanceId;
-	}
 
 	/**
 	 * Starts local recording timer and data collection.

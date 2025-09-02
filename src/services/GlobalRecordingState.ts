@@ -18,7 +18,7 @@ import type { EventListener, RecordingState, UnsubscribeFunction } from "../type
  */
 export type GlobalStateListener = EventListener<{
 	isRecording: boolean;
-	recordingInstanceId: string | null;
+	recordingInstance: object | null;
 	state: RecordingState;
 }>;
 export class GlobalRecordingState {
@@ -27,7 +27,7 @@ export class GlobalRecordingState {
 	 * Null when no recording is active. This allows us to ensure only the
 	 * component that started recording can stop it (prevents state conflicts).
 	 */
-	private recordingInstanceId: string | null = null;
+	private recordingInstance: object | null = null;
 
 	/**
 	 * Current recording state following the state machine pattern.
@@ -47,16 +47,16 @@ export class GlobalRecordingState {
 	 * This is the entry point for any component that wants to start recording.
 	 * The method implements atomic check-and-set to prevent race conditions.
 	 *
-	 * @param instanceId Unique identifier for the requesting component (e.g., "modal-1", "view-abc")
+	 * @param instance The component instance requesting recording permission
 	 * @returns true if recording was started successfully, false if another component is already recording
 	 */
-	tryStartRecording(instanceId: string): boolean {
-		if (this.recordingInstanceId !== null) {
+	tryStartRecording(instance: object): boolean {
+		if (this.recordingInstance !== null) {
 			return false; // Another component is already recording - reject this request
 		}
 
 		// Grant recording permission to this component
-		this.recordingInstanceId = instanceId;
+		this.recordingInstance = instance;
 		this.currentState = "recording";
 		this.notifyListeners(); // Inform all UI components about the state change
 		return true;
@@ -68,15 +68,15 @@ export class GlobalRecordingState {
 	 * This prevents components from accidentally stopping recordings they didn't start,
 	 * which could happen in complex UI scenarios or during rapid user interactions.
 	 *
-	 * @param instanceId The component requesting to stop recording
+	 * @param instance The component requesting to stop recording
 	 */
-	stopRecording(instanceId: string): void {
-		if (this.recordingInstanceId === instanceId) {
-			this.recordingInstanceId = null;
+	stopRecording(instance: object): void {
+		if (this.recordingInstance === instance) {
+			this.recordingInstance = null;
 			this.currentState = "idle";
 			this.notifyListeners(); // Notify all components that recording has stopped
 		}
-		// If instanceId doesn't match, silently ignore - this prevents component conflicts
+		// If instance doesn't match, silently ignore - this prevents component conflicts
 	}
 
 	/**
@@ -93,7 +93,7 @@ export class GlobalRecordingState {
 	 * disable record buttons, etc.
 	 */
 	isRecording(): boolean {
-		return this.recordingInstanceId !== null;
+		return this.recordingInstance !== null;
 	}
 
 	/**
@@ -101,8 +101,8 @@ export class GlobalRecordingState {
 	 * Essential for components to determine if they should show "stop" vs "start" buttons,
 	 * and for managing component-specific recording state.
 	 */
-	isRecordingInstance(instanceId: string): boolean {
-		return this.recordingInstanceId === instanceId;
+	isRecordingInstance(instance: object): boolean {
+		return this.recordingInstance === instance;
 	}
 
 	/**
@@ -132,8 +132,8 @@ export class GlobalRecordingState {
 	 */
 	private notifyListeners(): void {
 		const stateInfo = {
-			isRecording: this.recordingInstanceId !== null,
-			recordingInstanceId: this.recordingInstanceId,
+			isRecording: this.recordingInstance !== null,
+			recordingInstance: this.recordingInstance,
 			state: this.currentState,
 		};
 
@@ -150,7 +150,7 @@ export class GlobalRecordingState {
 	 * orphaned references.
 	 */
 	destroy(): void {
-		this.recordingInstanceId = null;
+		this.recordingInstance = null;
 		this.currentState = "idle";
 		this.listeners.clear();
 	}

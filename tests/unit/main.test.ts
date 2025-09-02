@@ -53,12 +53,10 @@ test("GlobalRecordingState can be instantiated", () => {
 });
 
 test("LocalRecordingState can be instantiated", () => {
-	// Test that local recording state can be created with proper ID
-	const instanceId = "test-instance-123";
-	const localState = new LocalRecordingState(instanceId);
+	// Test that local recording state can be created
+	const localState = new LocalRecordingState();
 
 	expect(localState).toBeTruthy();
-	expect(localState.getId()).toBe(instanceId);
 	expect(typeof localState.startRecording).toBe("function");
 	expect(typeof localState.stopRecording).toBe("function");
 	expect(typeof localState.getState).toBe("function");
@@ -70,22 +68,22 @@ test("LocalRecordingState can be instantiated", () => {
 test("Plugin architecture coordination - Global state prevents concurrent recordings", () => {
 	// Test the core architectural pattern: global state coordination
 	const globalState = new GlobalRecordingState();
-	const instance1 = new LocalRecordingState("instance-1");
-	const instance2 = new LocalRecordingState("instance-2");
+	const instance1 = new LocalRecordingState();
+	const instance2 = new LocalRecordingState();
 
 	// First instance should be able to start recording
-	const canStart1 = globalState.tryStartRecording(instance1.getId());
+	const canStart1 = globalState.tryStartRecording(instance1);
 	expect(canStart1).toBe(true);
 	expect(globalState.isRecording()).toBe(true);
-	expect(globalState.isRecordingInstance(instance1.getId())).toBe(true);
+	expect(globalState.isRecordingInstance(instance1)).toBe(true);
 
 	// Second instance should be blocked
-	const canStart2 = globalState.tryStartRecording(instance2.getId());
+	const canStart2 = globalState.tryStartRecording(instance2);
 	expect(canStart2).toBe(false);
-	expect(globalState.isRecordingInstance(instance2.getId())).toBe(false);
+	expect(globalState.isRecordingInstance(instance2)).toBe(false);
 
 	// Clean up
-	globalState.stopRecording(instance1.getId());
+	globalState.stopRecording(instance1);
 	globalState.destroy();
 	instance1.destroy();
 	instance2.destroy();
@@ -93,7 +91,7 @@ test("Plugin architecture coordination - Global state prevents concurrent record
 
 test("Plugin architecture coordination - Local state cleanup", () => {
 	// Test that local state properly manages its resources
-	const localState = new LocalRecordingState("test-instance");
+	const localState = new LocalRecordingState();
 
 	// Start recording to create interval timer
 	localState.startRecording();
@@ -129,7 +127,7 @@ test("Plugin services integration - State synchronization", () => {
 	});
 
 	// Simulate plugin workflow: global permission, then local start
-	const canStart = globalState.tryStartRecording(localState.getId());
+	const canStart = globalState.tryStartRecording(localState);
 	if (canStart) {
 		localState.startRecording();
 	}
@@ -142,7 +140,7 @@ test("Plugin services integration - State synchronization", () => {
 
 	// Cleanup
 	localState.stopRecording();
-	globalState.stopRecording(localState.getId());
+	globalState.stopRecording(localState);
 	globalUnsub();
 	localUnsub();
 	globalState.destroy();

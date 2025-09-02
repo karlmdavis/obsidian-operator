@@ -3,7 +3,6 @@ import { RecordingUI } from "../components/RecordingUI.js";
 import type { GlobalRecordingState } from "../services/GlobalRecordingState.js";
 import { LocalRecordingState } from "../services/LocalRecordingState.js";
 import type { RecordingUICallbacks } from "../types/index.js";
-import { generateInstanceId } from "../utils/instance-id.js";
 
 export const RECORDING_VIEW_TYPE = "operator-recording-view";
 
@@ -16,8 +15,7 @@ export class RecordingView extends ItemView {
 	constructor(leaf: WorkspaceLeaf, globalState: GlobalRecordingState) {
 		super(leaf);
 		this.globalState = globalState;
-		// Create unique instance ID for this view using type-safe generation
-		this.localState = new LocalRecordingState(generateInstanceId("view"));
+		this.localState = new LocalRecordingState();
 	}
 
 	getViewType(): string {
@@ -50,13 +48,13 @@ export class RecordingView extends ItemView {
 		// Create callbacks for the UI
 		const callbacks: RecordingUICallbacks = {
 			onRecord: () => {
-				if (this.globalState.tryStartRecording(this.localState.getId())) {
+				if (this.globalState.tryStartRecording(this.localState)) {
 					this.localState.startRecording();
 				}
 			},
 			onStop: () => {
 				this.localState.stopRecording();
-				this.globalState.stopRecording(this.localState.getId());
+				this.globalState.stopRecording(this.localState);
 			},
 		};
 
@@ -65,7 +63,7 @@ export class RecordingView extends ItemView {
 			if (this.recordingUI) {
 				const localStateData = this.localState.getState();
 				const isGlobalRecording = this.globalState.isRecording();
-				const isLocalRecording = this.globalState.isRecordingInstance(this.localState.getId());
+				const isLocalRecording = this.globalState.isRecordingInstance(this.localState);
 
 				this.recordingUI.updateProps({
 					isLocalRecording,
@@ -84,7 +82,7 @@ export class RecordingView extends ItemView {
 		// Create initial UI
 		const localStateData = this.localState.getState();
 		const isGlobalRecording = this.globalState.isRecording();
-		const isLocalRecording = this.globalState.isRecordingInstance(this.localState.getId());
+		const isLocalRecording = this.globalState.isRecordingInstance(this.localState);
 
 		this.recordingUI = new RecordingUI(uiContainer, {
 			isLocalRecording,
@@ -102,7 +100,7 @@ export class RecordingView extends ItemView {
 
 		// Update status based on current state
 		const updateStatus = () => {
-			const isLocalRec = this.globalState.isRecordingInstance(this.localState.getId());
+			const isLocalRec = this.globalState.isRecordingInstance(this.localState);
 			const isGlobalRec = this.globalState.isRecording();
 
 			if (isLocalRec) {
@@ -129,9 +127,9 @@ export class RecordingView extends ItemView {
 
 	async onClose(): Promise<void> {
 		// Stop recording if this view was recording
-		if (this.globalState.isRecordingInstance(this.localState.getId())) {
+		if (this.globalState.isRecordingInstance(this.localState)) {
 			this.localState.stopRecording();
-			this.globalState.stopRecording(this.localState.getId());
+			this.globalState.stopRecording(this.localState);
 		}
 
 		if (this.recordingUI) {

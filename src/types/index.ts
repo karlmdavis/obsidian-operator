@@ -14,9 +14,9 @@
 export type RecordingState = "idle" | "recording" | "stopping" | "error";
 
 export type RecordingTransition =
-	| { type: "START_RECORDING"; instanceId: string }
-	| { type: "STOP_RECORDING"; instanceId: string }
-	| { type: "RECORDING_ERROR"; instanceId: string; error: string }
+	| { type: "START_RECORDING"; instance: object }
+	| { type: "STOP_RECORDING"; instance: object }
+	| { type: "RECORDING_ERROR"; instance: object; error: string }
 	| { type: "RESET" };
 
 /**
@@ -50,7 +50,7 @@ export interface PluginEvent<T = unknown> {
 
 export interface RecordingEvent extends PluginEvent {
 	readonly type: "recording:start" | "recording:stop" | "recording:error" | "recording:update";
-	readonly instanceId: string;
+	readonly instance: object;
 	readonly data: {
 		readonly duration?: number;
 		readonly error?: string;
@@ -66,13 +66,6 @@ export type EventListener<T = unknown> = (event: T) => void;
 export type UnsubscribeFunction = () => void;
 export type AsyncCallback<T = unknown> = () => Promise<T>;
 export type SyncCallback<T = unknown> = () => T;
-
-/**
- * Instance identifier types for managing multiple UI components.
- * These ensure that instance IDs follow consistent patterns.
- */
-export type InstanceType = "modal" | "view" | "command";
-export type InstanceId = `${InstanceType}-${number}`;
 
 /**
  * UI construction types for building consistent interfaces.
