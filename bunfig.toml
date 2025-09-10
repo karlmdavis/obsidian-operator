@@ -9,8 +9,8 @@ registry = "https://registry.npmjs.org/"
 auto = false
 
 [test]
-# Test setup file for DOM globals and mocks
-preload = ["./tests/setup/happydom.ts"]
+# Test setup files for DOM globals and Obsidian mocks
+preload = ["./tests/setup/happydom.ts", "./tests/setup/obsidian-mock.ts"]
 
 # Test timeout (default: 5000ms)
 timeout = 10000

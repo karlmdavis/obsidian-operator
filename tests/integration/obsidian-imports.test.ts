@@ -20,7 +20,7 @@ test("Module structure is valid", () => {
 });
 
 test("Mock Obsidian classes exist", async () => {
-	const { MockApp, MockPlugin, MockModal } = await import("../mocks/obsidian.js");
+	const { MockApp, MockPlugin, MockModal } = await import("../setup/obsidian-mock.js");
 
 	expect(MockApp).toBeTruthy();
 	expect(MockPlugin).toBeTruthy();

@@ -13,7 +13,7 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
  */
 
 // Use dynamic imports for TypeScript mock compatibility
-const { MockApp, MockModal, MockScope } = await import("../../mocks/obsidian.js");
+const { MockApp, MockModal, MockScope } = await import("../../setup/obsidian-mock.js");
 const { GlobalRecordingState } = await import("../../../src/services/GlobalRecordingState.js");
 const { LocalRecordingState } = await import("../../../src/services/LocalRecordingState.js");
 

@@ -85,18 +85,18 @@ bun run lint:fix   # Fix auto-fixable linting issues
 bun run typecheck  # TypeScript type checking
 
 # Code Quality (CI Tasks - Recommended for verification)
-bun run ci:quality # Run all quality checks (lint + typecheck + coverage)
-bun run ci:coverage # Run coverage analysis only
+bun run ci:quality   # Run all quality checks (lint + typecheck + coverage)
+bun run ci:coverage  # (See test:coverage:text, below.)
 
 # Coverage Reports
-bun run test:coverage:text # Text coverage (only shows files imported by tests)
-bun run test:coverage:lcov # LCOV format (complete coverage data)
+bun run test:coverage:text          # Coverage analysis in text table
+bun run test:coverage:lcov:summary  # Coverage analysis in LCOV format, with brief summary
+bun run test:coverage:html          # Coverage analysis in HTML report
 ```
 
 ### Coverage Reporting Notes
-- **Text reporter limitation**: Bun's text coverage reporter only shows files that are imported by tests, which can give misleadingly high percentages
-- **Use LCOV for accuracy**: The LCOV reporter provides complete coverage across all source files
-- **GitHub Actions coverage**: The PR coverage comments use LCOV data and provide the most accurate coverage reporting
+- **Prerequisites**: LCOV and HTML coverage reports require `lcov` tools (`brew install lcov` on macOS, `apt-get install lcov` on Ubuntu)
+- **Coverage helper**: The `tests/coverage-helper.test.ts` file automatically discovers and imports all source files for comprehensive coverage tracking
 
 ### Code Quality Standards
 - **Linting is mandatory**: All code must pass linting without errors
