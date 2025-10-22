@@ -11,34 +11,19 @@ It's particularly necessary since I'm relying so heavily on LLM-generated code:
 
 ### Commit `3c6dacf6913ec1b8e5ef07543a8772d91de900ce`
 
-In the `coverage.yml` workflow...
+`coverage.yml`...
 
 - Does the trend analysis at the end work? How? Is it storing coverage in Git objects attached to the commits?
 
 `build.ts`...
 
-1. How come VS Code can't resolve so many function references?
-2. Why does it need a custom runTypeCheck(...) method. Shouldn't that be built-in?
-3. is validatePluginOutput(...) needed? Seems a bit extra.
-4. Why does it need a custom build(...) method? Shouldn't that be built-in?
+- How come VS Code can't resolve so many function references?
 
 `package.json`...
 
-1. Is the minimum version of Node (18) the right one for Obsidian? @types/node is at 22, and the latest available is 24.    
-2. Can we update the dependencies to the latest versions, or should we let renovate do that after this gets merged?
-3. Why does .husky/pre-commit not use the pre-commit hook defined in package.json? Does anything use the pre-push hook in there? Need to reconcile all that.
-4. These are all the same: test:coverage:check, test:coverage:strict, test:coverage. Are they redundant?
-5. Also redundant: test and ci:test.
-6. Also redundant: coverage:summary and test:coverage:text.
+- Can we update the dependencies to the latest versions, or should we let renovate do that after this gets merged?
 
 Could the CSS be organized better, and make better use of hierarchy?
-
-`CONTRIBUTING.md`...
-
-1. Could mention the use of volta to manage Node.js versions.
-2. What is the hotreload plugin it keeps mentioning? I've not seen it anywhere, nor seen it working.
-3. Is the coverage standards table accurate? I think the only thing being enforced is the blanket 80% target?
-4. Should mention commenting strategy.
 
 `main.ts`...
 
@@ -90,11 +75,6 @@ Could the CSS be organized better, and make better use of hierarchy?
 
 1. The state modeling here is very silly.
 
-`index.ts`...
-
-1. Centralizing types like this is bad for both humans and LLMs: easy to forget about them.
-2. I don't think these are used: `PluginEvent`, `RecordingEvent`, `SyncCallback`, `AsyncCallback`, `PluginConfig`, `PluginEnvironment`, `UIElementOptions` and children.
-
 `obsidian-imports.test.ts`...
 
 1. Silly comment at the top.
@@ -103,15 +83,7 @@ Could the CSS be organized better, and make better use of hierarchy?
 
 1. Why is it requiring `RecordingUI.js` as `any`? Why not the TS?
 
-`obsidian.js`...
-
-1. Why do we have this and also `obsidian.ts`?
-
 `RecordingUI.test.ts`...
 
 1. Why do we have two instances of this?
 2. We have tests for the child UI and for the modal, but none for the View.
-
-`sample.test.ts`...
-
-1. Do we still need this?
