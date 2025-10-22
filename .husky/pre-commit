@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+echo "Running pre-commit checks..."
+bun run pre-commit
+
+if [ $? -eq 0 ]; then
+    echo "✅ All pre-commit checks passed!"
+else
+    echo "❌ Pre-commit checks failed. Please fix the issues before committing."
+    exit 1
+fi

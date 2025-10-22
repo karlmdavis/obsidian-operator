@@ -1,0 +1,145 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Improve performance by skipping unnecessary Git operations
+  DISABLE_ESLINT_PLUGIN: true
+  CI: true
+
+jobs:
+  coverage:
+    name: Test Coverage Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch full history for coverage comparison
+        fetch-depth: 0
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun/install/cache
+          node_modules
+        key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+
+    - name: Run quality checks with coverage
+      run: bun run ci:coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: obsidian-operator-coverage
+        fail_ci_if_error: false # Don't fail if Codecov is down
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Generate coverage badge data
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Install lcov for coverage analysis
+        sudo apt-get update && sudo apt-get install -y lcov
+        
+        SUMMARY=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | tail -1)
+        
+        if [ -n "$SUMMARY" ]; then
+          COVERAGE_PCT=$(echo "$SUMMARY" | grep -o '[0-9.]*%' | head -1 | tr -d '%')
+          
+          # Determine badge color based on coverage
+          if (( $(echo "$COVERAGE_PCT >= 90" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$COVERAGE_PCT >= 80" | bc -l) )); then
+            COLOR="green"
+          elif (( $(echo "$COVERAGE_PCT >= 70" | bc -l) )); then
+            COLOR="yellow"
+          elif (( $(echo "$COVERAGE_PCT >= 60" | bc -l) )); then
+            COLOR="orange"
+          else
+            COLOR="red"
+          fi
+          
+          echo "Coverage: ${COVERAGE_PCT}% (${COLOR})"
+          echo "COVERAGE_PCT=${COVERAGE_PCT}" >> $GITHUB_ENV
+          echo "BADGE_COLOR=${COLOR}" >> $GITHUB_ENV
+        fi
+
+    - name: Comment PR with coverage report
+      if: github.event_name == 'pull_request'
+      uses: Nef10/lcov-reporter-action@v0.3.0
+      with:
+        lcov-file: ./coverage/lcov.info
+        pr_number: ${{ github.event.pull_request.number }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Archive coverage reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          coverage/
+        retention-days: 30
+
+  # Separate job for coverage trend analysis
+  coverage-trends:
+    name: Coverage Trends
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-reports
+        path: ./coverage
+
+    - name: Analyze coverage trends
+      run: |
+        echo "Analyzing coverage trends..."
+        
+        # This is a placeholder for trend analysis
+        # In practice, you'd store historical coverage data
+        # and compare with previous runs
+        
+        if [ -f "./coverage/lcov.info" ]; then
+          echo "Coverage data available for trend analysis"
+          
+          # Simple trend logging
+          mkdir -p .coverage-history
+          echo "{\"date\": \"$(date -I)\", \"commit\": \"${{ github.sha }}\", \"branch\": \"${{ github.ref_name }}\"}" >> .coverage-history/$(date -I).json
+          
+          echo "✅ Coverage trend analysis completed"
+        else
+          echo "⚠️ No coverage data available"
+        fi

@@ -1,0 +1,165 @@
+# Bun configuration with coverage settings
+
+[install]
+# Install exact versions to avoid compatibility issues
+exact = true
+
+# Use the most compatible registry
+registry = "https://registry.npmjs.org/"
+
+# Optional: Enable peer dependency auto-install
+auto = false
+
+[test]
+# Test setup file for DOM globals and mocks
+preload = ["./tests/setup/happydom.ts"]
+
+# Test timeout (default: 5000ms)
+timeout = 10000
+
+# Coverage configuration
+[test.coverage]
+# Enable coverage by default in CI
+# enabled = true  # Uncomment to enable by default
+
+# Coverage output directory
+dir = "./coverage"
+
+# Coverage reporters
+reporter = ["text", "lcov", "html"]
+
+# Coverage thresholds
+threshold = 80
+thresholds = { lines = 80, functions = 80, branches = 75, statements = 80 }
+
+# Files to include in coverage (glob patterns)
+include = [
+  "src/**/*.ts",
+  "src/**/*.js"
+]
+
+# Files to exclude from coverage (glob patterns)
+exclude = [
+  "**/*.test.ts",
+  "**/*.spec.ts", 
+  "**/*.test.js",
+  "**/*.spec.js",
+  "**/tests/**",
+  "**/test/**",
+  "**/__tests__/**",
+  "**/__test__/**",
+  "**/node_modules/**",
+  "**/coverage/**",
+  "**/coverage-html/**",
+  "**/*.d.ts",
+  "**/build.ts",
+  "**/build/**",
+  "**/dist/**",
+  "**/.next/**",
+  "**/.nuxt/**",
+  "**/public/**",
+  "**/static/**"
+]
+
+# Include all files, even those not imported by tests
+all = true
+
+# Skip coverage for files with no tests
+skipEmpty = false
+
+# Coverage report formats
+[test.coverage.text]
+# Show coverage summary in console
+enabled = true
+# Show file-by-file coverage
+file = true
+# Show only files below threshold
+skipFull = false
+
+[test.coverage.lcov]
+# Enable LCOV format (required for CI services)
+enabled = true
+# Output file name
+file = "lcov.info"
+
+[test.coverage.html]
+# Enable HTML reports for local development
+enabled = true
+# Subdirectory for HTML reports
+subdir = "html"
+
+[test.coverage.json]
+# Enable JSON format for programmatic access
+enabled = true
+# JSON summary file
+summary = "coverage-summary.json"
+
+# Advanced coverage options
+[test.coverage.advanced]
+# Disable coverage for specific functions/lines
+# Using Istanbul-style comments: /* istanbul ignore next */
+
+# Enable branch coverage
+branches = true
+
+# Enable function coverage  
+functions = true
+
+# Enable line coverage
+lines = true
+
+# Enable statement coverage
+statements = true
+
+# Watermarks for coverage coloring
+watermarks = {
+  statements = [50, 80],
+  functions = [50, 80], 
+  branches = [50, 80],
+  lines = [50, 80]
+}
+
+# Performance options
+[test.performance]
+# Parallel test execution
+parallel = true
+
+# Maximum number of test files to run in parallel
+maxConcurrency = 4
+
+# Bail on first test failure (faster feedback)
+bail = false
+
+# Test file pattern matching
+[test.patterns]
+# Test file patterns (default patterns work well)
+# test = ["**/*.test.{ts,js}", "**/*.spec.{ts,js}"]
+
+# Environment variables for testing
+[test.env]
+NODE_ENV = "test"
+# Add any test-specific environment variables here
+
+# Development environment overrides
+[development]
+# Faster installs in development
+install = { frozenLockfile = false }
+
+# Production environment overrides  
+[production]
+# Strict installs in production
+install = { frozenLockfile = true, exact = true }
+
+# CI environment overrides
+[ci]
+# Optimizations for CI environments
+install = { 
+  frozenLockfile = true, 
+  exact = true,
+  cache = false  # Disable cache in CI for consistency
+}
+
+test = {
+  coverage = { enabled = true, threshold = 80 },
+  bail = true  # Fail fast in CI
+}

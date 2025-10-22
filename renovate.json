@@ -1,9 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate configuration optimized for Obsidian TypeScript plugin with Bun",
   "extends": [
-    "config:recommended",
+    "config:js-lib",
     ":dependencyDashboard",
-    ":semanticCommitsDisabled"
+    ":semanticCommitsDisabled",
+    ":ignoreModulesAndTests",
+    "group:monorepos",
+    "helpers:disableTypesNodeMajor"
   ],
   "timezone": "America/New_York",
   "schedule": ["after 10pm and before 6am every weekday", "every weekend"],
@@ -11,66 +15,128 @@
   "assignees": ["karlmdavis"],
   "packageRules": [
     {
+      "description": "Obsidian core API and types - weekly updates on Monday",
+      "groupName": "Obsidian API",
+      "matchPackagePatterns": ["^obsidian$", "^@types/obsidian"],
+      "schedule": ["on monday"],
+      "reviewers": ["karlmdavis"],
+      "automerge": false
+    },
+    {
+      "description": "Voice processing and AI dependencies - careful review required",
+      "groupName": "voice processing dependencies",
+      "matchPackagePatterns": [
+        "openai",
+        "anthropic", 
+        "@anthropic-ai/*",
+        "speech",
+        "audio",
+        "whisper",
+        "voice"
+      ],
+      "reviewers": ["karlmdavis"],
+      "schedule": ["on saturday"],
+      "automerge": false
+    },
+    {
+      "description": "Build and development tooling - can be auto-merged for patches",
+      "groupName": "build tooling",
+      "matchPackagePatterns": [
+        "^@types/",
+        "typescript",
+        "bun-types",
+        "@biomejs/biome",
+        "esbuild",
+        "builtin-modules"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "schedule": ["before 6am on weekdays"]
+    },
+    {
+      "description": "Testing framework updates - grouped for easier review",
+      "groupName": "testing frameworks",
+      "matchPackagePatterns": [
+        "@happy-dom/*",
+        "happy-dom",
+        "vitest",
+        "@testing-library/*"
+      ],
+      "schedule": ["on friday"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "description": "GitHub Actions - monthly updates to avoid CI churn",
+      "groupName": "github actions", 
+      "matchManagers": ["github-actions"],
+      "schedule": ["on the first day of the month"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "matchUpdateTypes": ["patch", "pin", "digest"]
+    },
+    {
+      "description": "Security updates - highest priority, immediate processing",
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "vulnerabilityAlerts": {
+        "enabled": true
+      },
+      "prPriority": 15,
+      "schedule": ["at any time"],
+      "labels": ["security", "dependencies", "renovate"],
+      "assignees": ["karlmdavis"]
+    },
+    {
+      "description": "Major version updates - manual review required",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "reviewers": ["karlmdavis"],
+      "automerge": false
+    },
+    {
       "description": "Automatically merge minor and patch updates for dev dependencies",
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch"],
+      "excludePackagePatterns": ["^obsidian$", "openai", "anthropic", "@anthropic-ai/*"],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
-    },
-    {
-      "description": "Automatically merge patch updates for dependencies",
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["patch"],
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true
-    },
-    {
-      "description": "Group Obsidian API updates",
-      "matchPackageNames": ["obsidian"],
-      "groupName": "Obsidian API",
-      "automerge": false
-    },
-    {
-      "description": "Group TypeScript and related tools",
-      "matchPackageNames": ["typescript", "ts-node", "@types/node"],
-      "matchPackagePatterns": ["^@types/"],
-      "groupName": "TypeScript",
-      "automerge": false
-    },
-    {
-      "description": "Group ESLint and related packages",
-      "matchPackagePatterns": ["eslint"],
-      "groupName": "ESLint",
-      "automerge": true,
-      "automergeType": "pr"
-    },
-    {
-      "description": "Group testing tools",
-      "matchPackagePatterns": ["jest", "vitest", "@testing-library"],
-      "groupName": "Testing tools",
-      "automerge": true,
-      "automergeType": "pr"
-    },
-    {
-      "description": "Security updates",
-      "matchDatasources": ["npm"],
-      "matchUpdateTypes": ["patch"],
-      "matchDepTypes": ["dependencies", "devDependencies"],
-      "prPriority": 10,
-      "labels": ["security", "dependencies", "renovate"]
     }
   ],
+  "bun": {
+    "enabled": true
+  },
+  "postUpdateOptions": [
+    "bunInstall"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 3am on the first day of the month"],
+    "commitMessageAction": "Refresh lock file"
+  },
   "vulnerabilityAlerts": {
     "labels": ["security", "renovate"],
     "assignees": ["karlmdavis"],
     "prPriority": 15
   },
   "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
   "prCreation": "immediate",
   "rangeStrategy": "auto",
   "semanticCommits": "disabled",
-  "postUpdateOptions": ["npmDedupe"],
-  "ignorePaths": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  "rebaseWhen": "conflicted",
+  "reviewersFromCodeOwners": true,
+  "platformAutomerge": false,
+  "ignoreTests": true,
+  "ignorePaths": [
+    "**/node_modules/**", 
+    "**/dist/**", 
+    "**/build/**",
+    "**/coverage/**",
+    "**/dev/research/**"
+  ]
 }

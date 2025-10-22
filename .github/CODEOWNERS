@@ -1,0 +1,15 @@
+# Global ownership
+* @karlmdavis
+
+# Renovate configuration
+renovate.json @karlmdavis
+.github/renovate.json @karlmdavis
+
+# CI/CD workflows
+.github/workflows/ @karlmdavis
+
+# Project documentation and configuration
+CLAUDE.md @karlmdavis
+CONTRIBUTING.md @karlmdavis
+package.json @karlmdavis
+tsconfig.json @karlmdavis

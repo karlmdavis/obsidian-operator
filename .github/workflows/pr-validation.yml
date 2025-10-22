@@ -4,6 +4,11 @@ on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
+# Cancel in-progress runs when a new commit is pushed to the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   validate-pr:
     name: Validate PR
@@ -12,6 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for better diff comparisons
         
       - name: Check PR title format
         run: |
@@ -30,26 +37,3 @@ jobs:
           if [[ ! "$BRANCH" =~ ^(feature|fix|docs|style|refactor|test|chore|setup)/.+ ]]; then
             echo "::warning::Branch name '$BRANCH' doesn't follow convention: type/description"
           fi
-          
-      - name: Check for merge conflicts
-        run: |
-          # This is handled by GitHub, but we can add custom checks if needed
-          echo "Checking for merge conflicts..."
-          
-      - name: Validate file changes
-        run: |
-          # Check that certain files haven't been modified
-          PROTECTED_FILES=".github/workflows/codeql.yml"
-          
-          for file in $PROTECTED_FILES; do
-            if git diff --name-only origin/main..HEAD | grep -q "^$file$"; then
-              echo "::warning::Protected file modified: $file"
-            fi
-          done
-          
-      - name: Label PR based on files changed
-        uses: actions/labeler@v5
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          configuration-path: .github/labeler.yml
-        continue-on-error: true
